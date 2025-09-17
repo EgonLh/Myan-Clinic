@@ -2,10 +2,8 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-body {
 
-  @apply bg-gradient-to-r from-blue-200 to-cyan-200;
-}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuLink, NavigationMenuList } from "./navigation-menu";
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuLink, NavigationMenuList } from "../ui/navigation-menu";
 
 export function Navigation() {
   return (
