@@ -1,96 +1,128 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/app/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { useScrollAnimation } from "../hooks/use-scroll-animation"
+import {
+  CalendarRange,
+  FileText,
+  Stethoscope,
+  ShieldCheck,
+  HeartPulse,
+  Pill,
+  Syringe,
+  Hospital,
+  Users,
+  PhoneCall,
+  Database,
+  Microscope,
+  SquareArrowOutUpRight,
+} from "lucide-react";
 
+//  services we provided
 const services = {
-  webdev: {
-    title: "Web Development",
-    description: "Modern, responsive websites built with cutting-edge technologies",
+  Booking: {
+    title: "Appointment & Booking",
+    description:
+      "Streamlined booking system with reminders and confirmations. Patients can easily schedule visits, avoid long waiting times, and receive instant updates. Doctors benefit from an organized calendar that ensures smooth patient flow and better time management.",
     features: [
       {
-        title: "Responsive Design",
-        description: "Mobile-first approach ensuring perfect display on all devices",
-        icon: "📱",
+        title: "Easy Scheduling",
+        description:
+          "Book and manage appointments with doctors in real-time, with instant notifications and flexible rescheduling options.",
+        icon: <CalendarRange />,
       },
       {
-        title: "Performance Optimization",
-        description: "Lightning-fast loading times and smooth user experiences",
-        icon: "⚡",
+        title: "E-Prescriptions",
+        description:
+          "Doctors can send prescriptions directly to patients digitally, ensuring quick access to medications and reducing paperwork.",
+        icon: <FileText />,
       },
       {
-        title: "SEO Ready",
-        description: "Built-in search engine optimization for better visibility",
-        icon: "🔍",
+        title: "Specialist Matching",
+        description:
+          "Patients are matched with the right specialist based on their symptoms, saving time and improving diagnosis accuracy.",
+        icon: <Stethoscope />,
       },
       {
-        title: "Modern Frameworks",
-        description: "React, Next.js, and other cutting-edge technologies",
-        icon: "⚛️",
+        title: "Secure Records",
+        description:
+          "All booking and patient details are stored in encrypted systems, ensuring confidentiality and compliance with medical standards.",
+        icon: <ShieldCheck />,
       },
     ],
   },
-  design: {
-    title: "UI/UX Design",
-    description: "Beautiful, intuitive designs that convert visitors into customers",
+  Storage: {
+    title: "Medical Records & Care",
+    description:
+      "Securely manage patient health data and treatment history with advanced encryption. Patients can access their medical journey anytime, while doctors benefit from centralized data that improves decision-making and continuity of care.",
     features: [
       {
-        title: "User Research",
-        description: "Deep understanding of your target audience and their needs",
-        icon: "👥",
+        title: "Patient History",
+        description:
+          "View past diagnoses, prescriptions, allergies, and lab results in one place for comprehensive care.",
+        icon: <HeartPulse />,
       },
       {
-        title: "Wireframing",
-        description: "Strategic layout planning for optimal user flow",
-        icon: "📐",
+        title: "Pharmacy Integration",
+        description:
+          "Prescriptions are linked with local pharmacies for easy access, ensuring patients never miss essential medications.",
+        icon: <Pill />,
       },
       {
-        title: "Visual Design",
-        description: "Stunning interfaces that reflect your brand identity",
-        icon: "🎨",
+        title: "Lab Reports",
+        description:
+          "Digital upload and access to blood tests, X-rays, and scans allow faster review and seamless sharing between doctors and patients.",
+        icon: <Microscope />,
       },
       {
-        title: "Prototyping",
-        description: "Interactive mockups to test and refine user experience",
-        icon: "🔧",
+        title: "Vaccination Records",
+        description:
+          "Track immunizations, receive alerts for upcoming due vaccines, and keep families safe with timely reminders.",
+        icon: <Syringe />,
       },
     ],
   },
-  consulting: {
-    title: "Tech Consulting",
-    description: "Strategic guidance to help your business leverage technology effectively",
+  MedicalCare: {
+    title: "Clinic & Patient Support",
+    description:
+      "Holistic support for patients, doctors, and administrators. From hospital workflows to remote consultations, we provide tools that improve collaboration, enhance patient engagement, and strengthen trust in healthcare delivery.",
     features: [
       {
-        title: "Technology Audit",
-        description: "Comprehensive review of your current tech stack and processes",
-        icon: "🔍",
+        title: "Hospital Management",
+        description:
+          "Manage departments, staff, and patient workflows efficiently, reducing bottlenecks and ensuring quality care.",
+        icon: <Hospital />,
       },
       {
-        title: "Strategic Planning",
-        description: "Roadmap development for digital transformation initiatives",
-        icon: "📊",
+        title: "Patient Engagement",
+        description:
+          "Automated SMS/email reminders and follow-ups keep patients informed, improving satisfaction and treatment compliance.",
+        icon: <Users />,
       },
       {
-        title: "Team Training",
-        description: "Upskill your team with modern development practices",
-        icon: "🎓",
+        title: "Telemedicine",
+        description:
+          "Provide remote consultations via secure video or audio calls, making healthcare accessible anytime, anywhere.",
+        icon: <PhoneCall />,
       },
       {
-        title: "Architecture Review",
-        description: "Optimize your system architecture for scalability and performance",
-        icon: "🏗️",
+        title: "Analytics & Insights",
+        description:
+          "Leverage data-driven insights to improve patient care, identify trends, and make informed clinical and administrative decisions.",
+        icon: <Database />,
       },
     ],
   },
-}
+};
 
 export function ServicesSection() {
-  const [activeService, setActiveService] = useState<keyof typeof services>("webdev")
+  const [activeService, setActiveService] = useState<keyof typeof services>("Booking")
   const [isTransitioning, setIsTransitioning] = useState(false)
   const { elementRef, isVisible } = useScrollAnimation({ threshold: 0.1 })
 
+  // service handler
   const handleServiceChange = (service: keyof typeof services) => {
     if (service === activeService) return
 
@@ -115,11 +147,11 @@ export function ServicesSection() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+          <h2 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-green-600">
             Our Services
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Choose from our comprehensive range of services designed to elevate your digital presence
+          <p className="text-sm text-muted-foreground max-w-2xl mx-auto font-semibold">
+            Choose from our comprehensive range of medical services designed to keep you safe, supported, and cared for at every stage of your health journey.
           </p>
         </div>
 
@@ -130,36 +162,34 @@ export function ServicesSection() {
           }`}
         >
           {/* First row - 2 buttons */}
-          <div className="flex gap-4">
+          <div className="flex gap-4 grid grid-cols-2 md:grid-cols-3 justify-center  p-1 ">
             <Button
-              variant={activeService === "webdev" ? "default" : "outline"}
+              variant={activeService === "Booking" ? "default" : "outline"}
               size="lg"
-              onClick={() => handleServiceChange("webdev")}
-              className="px-8 py-3 text-lg font-medium transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg active:shadow-sm transform"
+              onClick={() => handleServiceChange("Booking")}
+              className="px-8 py-3 m-1 text-lg font-medium border-none shadow-none transition-all duration-300 hover:scale-105 active:scale-95  active:shadow-sm "
             >
-              Web Development
+              Appointment
             </Button>
             <Button
-              variant={activeService === "design" ? "default" : "outline"}
+              variant={activeService === "Storage" ? "default" : "outline"}
               size="lg"
-              onClick={() => handleServiceChange("design")}
-              className="px-8 py-3 text-lg font-medium transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg active:shadow-sm transform"
+              onClick={() => handleServiceChange("Storage")}
+              className="px-8 py-3 m-1 text-lg font-medium transition-all border-none  shadow-none  duration-300 hover:scale-105 active:scale-95 hover:shadow-lg active:shadow-sm "
             >
-              UI/UX Design
+              Storage
+            </Button>
+             <Button
+              variant={activeService === "MedicalCare" ? "default" : "outline"}
+              size="lg"
+              onClick={() => handleServiceChange("MedicalCare")}
+              className="px-8 py-3 m-1 text-lg font-medium border-none shadow-none transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg active:shadow-sm "
+            >
+              Medical Care
             </Button>
           </div>
 
-          {/* Second row - 1 button centered */}
-          <div>
-            <Button
-              variant={activeService === "consulting" ? "default" : "outline"}
-              size="lg"
-              onClick={() => handleServiceChange("consulting")}
-              className="px-8 py-3 text-lg font-medium transition-all duration-300 hover:scale-105 active:scale-95 hover:shadow-lg active:shadow-sm transform"
-            >
-              Tech Consulting
-            </Button>
-          </div>
+         
         </div>
 
         {/* Service Content */}
@@ -169,34 +199,41 @@ export function ServicesSection() {
           } ${isVisible ? "opacity-100" : "opacity-0"}`}
         >
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold mb-4">{services[activeService].title}</h3>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">{services[activeService].description}</p>
+            <h3 className="text-xl font-bold mb-4 text-slate-600">{services[activeService].title}</h3>
+            <p className="text-md text-muted-foreground max-w-3xl mx-auto">{services[activeService].description}</p>
           </div>
 
           {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+         <div className="w-full flex justify-center">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6  max-w-[800px]  flex justify-center items-center ">
             {services[activeService].features.map((feature, index) => (
               <Card
                 key={`${activeService}-${index}`}
-                className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-blue-200 dark:hover:border-blue-800 hover:scale-[1.02] transform animate-in fade-in slide-in-from-bottom-4"
+                className="group border-none  shadow-none transition-all duration-300 hover:border hover:bg-muted  p-2 pt-4  hover:scale-[1.02] transform animate-in fade-in slide-in-from-bottom-4"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <CardHeader className="pb-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl transition-transform duration-300 group-hover:scale-110 group-hover:animate-bounce">
+                <CardHeader className="  ">
+                  <div className="flex items-center gap-3  ">
+                    <span className="text-xl transition-transform duration-300 group-hover:scale-110 group-hover:animate-bounce">
                       {feature.icon}
                     </span>
-                    <CardTitle className="text-xl group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <CardTitle className="text-lg font-mono hover:underline duration-300 group-hover:text-green-600  transition-colors">
                       {feature.title}
                     </CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base leading-relaxed">{feature.description}</CardDescription>
+                <CardContent className=" ">
+                  <CardDescription className="text-base text-xs text-justify tracking-wider text-muted-foreground leading-relaxed  hover:text-black">{feature.description}</CardDescription>
                 </CardContent>
+                <CardFooter className=" m-0 flex justify-end items-end  p-0 ">
+                  <Button variant="link" className="text-xs  underline hover:no-underline hover:text-green-600 transition-all duration-300">
+                     <SquareArrowOutUpRight className="inline  h-4 w-4 " />
+                  </Button>
+                </CardFooter>
               </Card>
             ))}
           </div>
+         </div>
         </div>
       </div>
     </section>

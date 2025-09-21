@@ -1,22 +1,22 @@
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@/app/components/ui/separator"
 
 export function Footer() {
   return (
-    <footer className="p-9  border">
+    <footer className="p-9  ">
       <div className="container mx-auto px-4 py-12">
         {/* Main footer content with responsive grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8 mb-8">
           {/* Company Info Column */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Company</h3>
+            <h3 className="text-lg font-semibold text-foreground">MyanClinic</h3>
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
-                Building amazing experiences with modern web technologies.
+               Your Health , Our Priority
               </p>
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">123 Tech Street</p>
-                <p className="text-sm text-muted-foreground">San Francisco, CA 94105</p>
-                <p className="text-sm text-muted-foreground">contact@company.com</p>
+                <p className="text-sm text-muted-foreground">123 Pyay Street</p>
+                <p className="text-sm text-muted-foreground">Yangon, Myanmar</p>
+                <p className="text-sm text-muted-foreground">contact@myanclinic.com</p>
               </div>
             </div>
           </div>
@@ -44,7 +44,7 @@ export function Footer() {
           </div>
 
           {/* Resources Column */}
-          <div className="space-y-4 bg-dark flex flex-col justify-center border md:items-end ">
+          <div className="space-y-4 flex flex-col justify-center  md:items-end ">
             <h3 className="text-lg font-semibold text-foreground">Resources</h3>
             <nav className="space-y-2 md:text-end">
               <a href="#" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -70,7 +70,7 @@ export function Footer() {
 
         {/* Bottom section with copyright and social links */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">© 2024 Company Name. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2025 MyanClinic. All rights reserved.</p>
           <div className="flex space-x-4">
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
               <span className="sr-only">Twitter</span>
