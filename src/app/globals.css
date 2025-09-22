@@ -2,7 +2,31 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+/* Target specific scrollbar parts */
+/* Custom scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 7px;              /* Vertical scrollbar width */
+  height: 7px;             /* Horizontal scrollbar height */
+}
 
+::-webkit-scrollbar-track {
+  background: #f8fafc;      /* Track background */
+  border-radius: 10px;      /* Rounded track */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #000000;  /* Scrollbar thumb color */
+  border-radius: 10px;        /* Rounded thumb */
+  border: 2px solid #f8fafc;  /* Adds padding around thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #000000;  /* Darker green on hover */
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;   /* Remove weird corner in bottom-right */
+}
 
 @theme inline {
   --color-background: var(--background);
