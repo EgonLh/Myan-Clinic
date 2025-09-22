@@ -1,20 +1,25 @@
 
-import { HeroSection } from "./components/core/Hero-Section";
-import { ServicesSection } from "./components/core/Services-Section";
-import { AboutSection } from "./components/core/Aboutus";
-import { FAQSection } from "./components/core/FAQSection";
-import NavigationBar from "./components/core/NavBar";
-import { Footer } from "./components/core/Footer";
+
+
+import { AboutUs } from "@/components/core/AboutSection";
+import { FAQ } from "@/components/core/FAQ";
+import { Footer } from "@/components/core/Footer";
+import HeroSection from "@/components/core/HeroSection";
+import { NavigationBar } from "@/components/core/NavigationBar";
+import { Services } from "@/components/core/ServicesSection";
 
 export default function Home() {
   return (
     <div>
       <NavigationBar/>
-      <HeroSection/>
-      <ServicesSection/>
-      <AboutSection/>
-      <FAQSection/>
-      <Footer/>
+       <HeroSection/>
+       <Services/>
+       <AboutUs/>
+      {/*
+      
+      
+       */}
+       <FAQ/>       <Footer/>
     </div>
   );
 }

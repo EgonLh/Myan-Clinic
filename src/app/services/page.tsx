@@ -1,13 +1,13 @@
 "use client"
 
-import { Button } from "@/app/components/ui/button"
-import { Card } from "@/app/components/ui/card"
-import { useScrollAnimation } from "../components/hooks/use-scroll-animation"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { useScrollAnimation } from "@/components/use-scroll-animation"
 
 export default function ServicesPage() {
-  const { elementRef: heroRef, isVisible: heroVisible } = useScrollAnimation({ threshold: 0.2 })
-  const { elementRef: servicesRef, isVisible: servicesVisible } = useScrollAnimation({ threshold: 0.2 })
-  const { elementRef: ctaRef, isVisible: ctaVisible } = useScrollAnimation({ threshold: 0.2 })
+  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation({ threshold: 0.2 })
+  const { ref: servicesRef, isVisible: servicesVisible } = useScrollAnimation({ threshold: 0.2 })
+  const { ref: ctaRef, isVisible: ctaVisible } = useScrollAnimation({ threshold: 0.2 })
 
   const services = [
     {

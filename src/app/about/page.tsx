@@ -1,15 +1,15 @@
 "use client"
 
-import { Button } from "@/app/components/ui/button"
-import { Card } from "@/app/components/ui/card"
-import { useScrollAnimation } from "../components/hooks/use-scroll-animation"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { useScrollAnimation } from "@/components/use-scroll-animation"
 
 export default function AboutPage() {
-  const { elementRef: heroRef, isVisible: heroVisible } = useScrollAnimation({ threshold: 0.2 })
-  const { elementRef: storyRef, isVisible: storyVisible } = useScrollAnimation({ threshold: 0.2 })
-  const { elementRef: valuesRef, isVisible: valuesVisible } = useScrollAnimation({ threshold: 0.2 })
-  const { elementRef: teamRef, isVisible: teamVisible } = useScrollAnimation({ threshold: 0.2 })
-  const { elementRef: statsRef, isVisible: statsVisible } = useScrollAnimation({ threshold: 0.2 })
+  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation({ threshold: 0.2 })
+  const { ref: storyRef, isVisible: storyVisible } = useScrollAnimation({ threshold: 0.2 })
+  const { ref: valuesRef, isVisible: valuesVisible } = useScrollAnimation({ threshold: 0.2 })
+  const { ref: teamRef, isVisible: teamVisible } = useScrollAnimation({ threshold: 0.2 })
+  const { ref: statsRef, isVisible: statsVisible } = useScrollAnimation({ threshold: 0.2 })
 
   return (
     <div className="min-h-screen bg-background">
