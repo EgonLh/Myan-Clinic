@@ -31,7 +31,7 @@ export function Footer() {
           </div>
 
           {/* Column 2: Quick Links */}
-          <div className="space-y-4 flex justify-center ">
+          <div className="space-y-4 flex md:justify-center ">
             
             <div className="space-y-2">
               <h4 className="text-lg font-medium text-foreground">QuickLinks</h4>
@@ -98,14 +98,11 @@ export function Footer() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <p className="text-sm text-muted-foreground">© 2024 MyanClinic. All rights reserved.</p>
             <div className="flex gap-4">
-              <a href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <a href="/terms-and-conditions" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Terms of Service
               </a>
-              <a href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <a href="/privacy-policy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Privacy Policy
-              </a>
-              <a href="/cookies" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Cookie Policy
               </a>
             </div>
           </div>

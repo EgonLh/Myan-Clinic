@@ -41,13 +41,14 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-black font-mono text-white hover:bg-gray-800 rounded-full px-8 py-3">
+            <Button className="bg-black font-mono text-white hover:bg-gray-800 rounded-full px-8 py-3" onClick={() => window.location.href = '/login'}>
               <Star className="w-4 h-4 " />
               Take A Book
             </Button>
             <Button
               variant="outline"
               className="rounded-full font-mono px-8 py-3 shadow bg-transparent"
+              onClick={() => window.location.href = '/about'}
             >
               <svg
                 className="w-4 h-4"

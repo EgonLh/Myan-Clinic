@@ -125,7 +125,7 @@ export function NavigationBar() {
 
           {/* Column 3: CTA Button & Mobile Menu Toggle */}
           <div className="flex items-center gap-4">
-            <Button className="hidden md:inline-flex">Get Started</Button>
+            <Button className="hidden md:inline-flex" onClick={() => window.location.href = "/login"}>Get Started</Button>
             <Button
               variant="ghost"
               size="icon"

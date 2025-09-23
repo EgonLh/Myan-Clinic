@@ -26,9 +26,9 @@ export default function LoginPage() {
     <div className="min-h-screen ">
       <div className="container mx-auto px-4 py-8 flex justify-center items-center">
         <div className="border bg-neutral-800 text-white flex max-w-5xl justify-center items-center rounded-3xl">
-          <div className="grid flex justify-center p-3 grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div className="grid flex justify-center min-w-[400px] md:min-w-[500px] p-3 grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* Left Side - Marketing Content */}
-            <div className="relative overflow-hidden rounded-3xl bg-white p-12 text-black">
+            <div className="  lg:block  relative hidden   overflow-hidden rounded-3xl bg-white p-12 text-black">
               {/* Blurred green spots */}
               <div className="absolute top-0 right-0 w-96 h-96 bg-green-200 rounded-full blur-3xl"></div>
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-300 rounded-full blur-2xl"></div>
@@ -89,7 +89,7 @@ export default function LoginPage() {
             </div>
 
             {/* Right Side - Login Form */}
-            <div className="flex items-center justify-center">
+            <div className="flex items-center w-full justify-center">
               <Card className="w-full max-w-md border-0 shadow-2xl bg-neutral-800 text-white shadow-none">
                 <CardHeader className="space-y-1 text-center">
                   <CardTitle className="text-2xl font-bold text-slate-100">Welcome back .</CardTitle>

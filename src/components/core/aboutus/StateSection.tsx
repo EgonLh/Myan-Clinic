@@ -1,6 +1,7 @@
 "use client"
 
-import { useScrollAnimation } from "@/components/use-scroll-animation"
+import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+
 
 const stats = [
   { number: "1000+", label: "Appointments Booked", delay: "delay-300" },

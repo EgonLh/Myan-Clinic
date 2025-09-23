@@ -3,11 +3,11 @@
 import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
-import { Button } from "@/app/components/ui/button"
-import { Input } from "@/app/components/ui/input"
-import { Label } from "@/app/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
-import { Separator } from "@/app/components/ui/separator"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import { Github } from "lucide-react"
 
 export default function RegisterPage() {
@@ -24,10 +24,10 @@ export default function RegisterPage() {
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8 flex justify-center items-center">
         <div className="border bg-neutral-800 text-white flex max-w-5xl justify-center items-center rounded-3xl">
-          <div className="grid flex justify-center p-3 grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div className="grid flex justify-center p-3 grid-cols-1 min-w-[400px] md:min-w-[500px] lg:grid-cols-2 gap-2 items-center">
             
             {/* Left Side - Telemedicine Marketing */}
-            <div className="relative overflow-hidden rounded-3xl bg-white p-12 text-black">
+            <div className="lg:block  relative hidden overflow-hidden rounded-3xl bg-white p-12 h-full text-black">
               {/* Blurred green spots */}
               <div className="absolute top-0 right-0 w-96 h-96 bg-green-200 rounded-full blur-3xl"></div>
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-300 rounded-full blur-2xl"></div>

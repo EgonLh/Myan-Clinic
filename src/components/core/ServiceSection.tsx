@@ -3,8 +3,8 @@
 import { useState } from "react"
 
 import { Activity, Heart, FileText, Calendar, Users, Stethoscope, Pill } from "lucide-react";
-import { useScrollAnimation } from "../use-scroll-animation";
 import Link from "next/link";
+import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 
 const servicesData = {
   "Patient Services": [

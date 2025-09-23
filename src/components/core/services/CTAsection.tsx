@@ -1,7 +1,8 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { useScrollAnimation } from "@/components/use-scroll-animation"
+import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+
 
 export default function CTASection() {
   const { ref: ctaRef, isVisible: ctaVisible } = useScrollAnimation({ threshold: 0.2 })

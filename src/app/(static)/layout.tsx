@@ -10,10 +10,8 @@ export default function Layout({
     return (
         <div>
             <NavigationBar />
-
             {children}
             <Footer />
-
         </div>
     );
 }

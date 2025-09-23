@@ -1,6 +1,7 @@
 "use client"
 
-import { useScrollAnimation } from "@/components/use-scroll-animation"
+import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+
 import ServiceCard from "./ServiceCard"
 
 const services = [
