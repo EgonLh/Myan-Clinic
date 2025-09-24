@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,15 +8,53 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Github } from "lucide-react"
+import { Formik, Form, Field, ErrorMessage } from "formik"
+import * as Yup from "yup"
+import { useDispatch } from "react-redux"
+import { setCredentials } from "@/app/store/features/auth/authSlice"
+import { useRegisterMutation } from "@/app/store/features/auth/authApi"
+import { redirect } from "next/navigation"
+
+// Define form values type
+interface RegisterFormValues {
+  name: string
+  username: string
+  email: string
+  password: string
+  role: "Root" | "Doctor" | "Patient"
+}
 
 export default function RegisterPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const dispatch = useDispatch();
+  const [register, { isLoading, error }] = useRegisterMutation();
+  const initialValues: RegisterFormValues = {
+    name: "",
+    username: "",
+    email: "",
+    password: "",
+    role: "Patient" // Default role
+  }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Registration attempt:", { name, email, password })
+  const validationSchema = Yup.object({
+    name: Yup.string().min(2, "Name too short").required("Required"),
+    username: Yup.string().min(4, "Username too short").required("Required"),
+    email: Yup.string().email("Invalid email").required("Required"),
+    password: Yup.string().min(6, "Password too short").required("Required"),
+    role: Yup.string().oneOf(["Root", "Doctor", "Patient"]).required("Required"),
+  })
+
+  const handleSubmit = async (values: RegisterFormValues) => {
+    console.log("Registration attempt:", values)
+    try{
+      const result = await register(values).unwrap();
+      // dispatch(setCredentials(result));
+      console.log("Registration successful:", result);
+      
+      // later to update
+      redirect('/login');
+    } catch (error) {
+      console.error("Registration failed:", error);
+    }
   }
 
   return (
@@ -25,7 +62,7 @@ export default function RegisterPage() {
       <div className="container mx-auto px-4 py-8 flex justify-center items-center">
         <div className="border bg-neutral-800 text-white flex max-w-5xl justify-center items-center rounded-3xl">
           <div className="grid flex justify-center p-3 grid-cols-1 min-w-[400px] md:min-w-[500px] lg:grid-cols-2 gap-2 items-center">
-            
+
             {/* Left Side - Telemedicine Marketing */}
             <div className="lg:block  relative hidden overflow-hidden rounded-3xl bg-white p-12 h-full text-black">
               {/* Blurred green spots */}
@@ -84,60 +121,83 @@ export default function RegisterPage() {
                 </CardHeader>
 
                 <CardContent className="space-y-6">
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="text-sm font-medium text-gray-300">Name</Label>
-                      <Input
-                        id="name"
-                        type="text"
-                        placeholder="Enter your name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="h-10 border-neutral-600 focus:bg-neutral-700 shadow-none focus:outline-none"
-                        required
-                      />
-                    </div>
+                  <Formik
+                    initialValues={initialValues}
+                    validationSchema={validationSchema}
+                    onSubmit={handleSubmit}
+                  >
+                    {({ isSubmitting }) => (
+                      <Form className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="name" className="text-sm font-medium text-gray-300">Name</Label>
+                          <Field
+                            as={Input}
+                            id="name"
+                            name="name"
+                            placeholder="Enter your name"
+                            className="h-10 border-neutral-600 focus:bg-neutral-700 shadow-none focus:outline-none"
+                          />
+                          <ErrorMessage name="name" component="div" className="text-red-500 text-xs" />
+                        </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-sm font-medium text-gray-300">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="h-10 border-neutral-600 focus:bg-neutral-700 shadow-none focus:outline-none"
-                        required
-                      />
-                    </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="username" className="text-sm font-medium text-gray-300">Username</Label>
+                          <Field
+                            as={Input}
+                            id="username"
+                            name="username"
+                            placeholder="Enter your username"
+                            className="h-10 border-neutral-600 focus:bg-neutral-700 shadow-none focus:outline-none"
+                          />
+                          <ErrorMessage name="username" component="div" className="text-red-500 text-xs" />
+                        </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="password" className="text-sm font-medium text-gray-300">Password</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="h-10 border-neutral-600 focus:bg-neutral-700 shadow-none focus:outline-none"
-                        required
-                      />
-                    </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="email" className="text-sm font-medium text-gray-300">Email</Label>
+                          <Field
+                            as={Input}
+                            id="email"
+                            name="email"
+                            type="email"
+                            placeholder="Enter your email"
+                            className="h-10 border-neutral-600 focus:bg-neutral-700 shadow-none focus:outline-none"
+                          />
+                          <ErrorMessage name="email" component="div" className="text-red-500 text-xs" />
+                        </div>
 
-                    <div className="text-xs text-gray-400 leading-relaxed">
-                      By signing up you agree to our{" "}
-                      <Link href="/terms" className="text-green-500 hover:text-green-600">Terms of Use</Link>{" "}
-                      and{" "}
-                      <Link href="/privacy" className="text-green-500 hover:text-green-600">Privacy Policy</Link>.
-                    </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="password" className="text-sm font-medium text-gray-300">Password</Label>
+                          <Field
+                            as={Input}
+                            id="password"
+                            name="password"
+                            type="password"
+                            placeholder="Enter your password"
+                            className="h-10 border-neutral-600 focus:bg-neutral-700 shadow-none focus:outline-none"
+                          />
+                          <ErrorMessage name="password" component="div" className="text-red-500 text-xs" />
+                        </div>
 
-                    <Button
-                      type="submit"
-                      className="w-full h-10 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200"
-                    >
-                      Sign Up
-                    </Button>
-                  </form>
+                        {/* Hidden role field */}
+                        <Field type="hidden" name="role" />
+
+                        <div className="text-xs text-gray-400 leading-relaxed">
+                          By signing up you agree to our{" "}
+                          <Link href="/terms" className="text-green-500 hover:text-green-600">Terms of Use</Link>{" "}
+                          and{" "}
+                          <Link href="/privacy" className="text-green-500 hover:text-green-600">Privacy Policy</Link>.
+                        </div>
+
+                        <Button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="w-full h-10 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200"
+                        >
+                          Sign Up
+                        </Button>
+                      </Form>
+                    )}
+                  </Formik>
 
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
@@ -173,3 +233,4 @@ export default function RegisterPage() {
     </div>
   )
 }
+

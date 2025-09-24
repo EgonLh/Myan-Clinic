@@ -1,9 +1,24 @@
 import { configureStore } from '@reduxjs/toolkit'
-import CounterSlice from './features/Counter/counter.slice'
+import authReducer from './features/auth/authSlice'
+import { authApi } from './features/auth/authApi'
+import { doctorApi } from './features/doctor/doctorApi'
+import { patientApi } from './features/patient/patientApi'
+import { storageApi } from './features/storage/storageApi'
 export const store = configureStore({
   reducer: {
-    counter: CounterSlice,
+    auth:authReducer,
+    [authApi.reducerPath]: authApi.reducer,
+    [doctorApi.reducerPath]:doctorApi.reducer,
+    [patientApi.reducerPath]: patientApi.reducer,
+    [storageApi.reducerPath]: storageApi.reducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(
+      authApi.middleware,
+      doctorApi.middleware,
+      patientApi.middleware,
+      storageApi.middleware
+    ),
 })
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

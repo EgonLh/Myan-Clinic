@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb"
 import { usePathname } from "next/navigation"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { FileQuestion, MessageCircleQuestion, ScanEye, Shield, ShieldQuestion, TableOfContents } from "lucide-react"
 
 export function SiteHeader() {

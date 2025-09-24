@@ -1,6 +1,6 @@
-import { ChartsGrid } from "@/components/charts-grid";
-import { DashboardHeader } from "@/components/dashboard-header";
-import { MetricsGrid } from "@/components/metrics-grid";
+import { ChartsGrid } from "@/components/ui/charts-grid";
+import { DashboardHeader } from "@/components/ui/dashboard-header";
+import { MetricsGrid } from "@/components/ui/metrics-grid";
 
 
 export default function DashboardPage() {
