@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface AuthState {
-  user: { id: number; email: string; role: string } | null;
+  user: { id: number; email: string; role: string,user_id:number } | null;
   token: string | null;
 }
 

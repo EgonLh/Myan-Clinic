@@ -1,56 +1,55 @@
-import { CreateStorageFileRequest, StorageFile, UpdateStorageFileRequest } from "@/types/storageFile";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { IStorage, CreateStorageRequest, UpdateStorageRequest } from "@/types/storage.type";
 
 export const storageApi = createApi({
   reducerPath: "storageApi",
   baseQuery: fetchBaseQuery({
     baseUrl: "http://localhost:3000",
     prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as any).auth.token;
+      const token = (getState() as any).auth?.token;
       if (token) headers.set("authorization", `Bearer ${token}`);
       return headers;
     },
   }),
   tagTypes: ["Storage"],
   endpoints: (builder) => ({
-    // GET all files for a patient
-    getFilesByPatient: builder.query<StorageFile[], number>({
-      query: (patientId) => `/storage/patient/${patientId}`,
-      providesTags: (result, error, patientId) =>
+    getStorages: builder.query<IStorage[], void>({
+      query: () => "/storage",
+      providesTags: (result) =>
         result
           ? [
               ...result.map(({ id }) => ({ type: "Storage" as const, id })),
-              { type: "Storage", id: `PATIENT-${patientId}` },
+              { type: "Storage", id: "LIST" },
             ]
-          : [{ type: "Storage", id: `PATIENT-${patientId}` }],
+          : [{ type: "Storage", id: "LIST" }],
     }),
 
-    // GET single file
-    getFileById: builder.query<StorageFile, number>({
+    getStorageById: builder.query<IStorage, number>({
       query: (id) => `/storage/${id}`,
       providesTags: (result, error, id) => [{ type: "Storage", id }],
     }),
 
-    // UPLOAD file
-    uploadFile: builder.mutation<StorageFile, CreateStorageFileRequest>({
-      query: ({ patientId, file }) => {
-        const formData = new FormData();
-        formData.append("patientId", patientId.toString());
-        formData.append("file", file);
-
-        return {
-          url: "/storage",
-          method: "POST",
-          body: formData,
-        };
-      },
-      invalidatesTags: (result, error, { patientId }) => [
-        { type: "Storage", id: `PATIENT-${patientId}` },
-      ],
+    getStorageByPatient: builder.query<IStorage[], number>({
+      query: (patientId) => `/storage/patient/${patientId}`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: "Storage" as const, id })),
+              { type: "Storage", id: "LIST" },
+            ]
+          : [{ type: "Storage", id: "LIST" }],
     }),
 
-    // UPDATE file metadata (rename, soft-delete, etc.)
-    updateFile: builder.mutation<StorageFile, { id: number; body: UpdateStorageFileRequest }>({
+    createStorage: builder.mutation<IStorage, CreateStorageRequest>({
+      query: (body) => ({
+        url: "/storage",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [{ type: "Storage", id: "LIST" }],
+    }),
+
+    updateStorage: builder.mutation<IStorage, { id: number; body: UpdateStorageRequest }>({
       query: ({ id, body }) => ({
         url: `/storage/${id}`,
         method: "PATCH",
@@ -59,21 +58,24 @@ export const storageApi = createApi({
       invalidatesTags: (result, error, { id }) => [{ type: "Storage", id }],
     }),
 
-    // DELETE file permanently
-    deleteFile: builder.mutation<{ success: boolean; id: number }, number>({
+    deleteStorage: builder.mutation<{ success: boolean; id: number }, number>({
       query: (id) => ({
         url: `/storage/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, id) => [{ type: "Storage", id }],
+      invalidatesTags: (result, error, id) => [
+        { type: "Storage", id },
+        { type: "Storage", id: "LIST" },
+      ],
     }),
   }),
 });
 
 export const {
-  useGetFilesByPatientQuery,
-  useGetFileByIdQuery,
-  useUploadFileMutation,
-  useUpdateFileMutation,
-  useDeleteFileMutation,
+  useGetStoragesQuery,
+  useGetStorageByIdQuery,
+  useGetStorageByPatientQuery,
+  useCreateStorageMutation,
+  useUpdateStorageMutation,
+  useDeleteStorageMutation,
 } = storageApi;

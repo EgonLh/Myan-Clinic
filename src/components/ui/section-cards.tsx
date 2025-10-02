@@ -1,6 +1,6 @@
-import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react"
-
-import { Badge } from "@/components/ui/badge"
+"use client"
+import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardAction,
@@ -8,51 +8,58 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-const stats = [
-  {
-    title: "Total Patients",
-    value: "$1,250.00",
-    change: "+12.5%",
-    trend: "up",
-    description: "Trending up this month",
-    subtext: "Visitors for the last 6 months",
-    bg: "bg-black ", // override style if needed
-  },
-  {
-    title: "Total Doctors",
-    value: "1,234",
-    change: "-20%",
-    trend: "down",
-    description: "Down 20% this period",
-    subtext: "Acquisition needs attention",
-    bg: "bg-white/80", // muted background
-  },
-  {
-    title: "Active Patients",
-    value: "45,678",
-    change: "+12.5%",
-    trend: "up",
-    description: "Strong user retention",
-    subtext: "Engagement exceed targets",
-    bg: "bg-white/80",
-  },
-  {
-    title: "Growth Rate",
-    value: "4.5%",
-    change: "+4.5%",
-    trend: "up",
-    description: "Steady performance increase",
-    subtext: "Meets growth projections",
-    bg: "bg-white/80",
-  },
-]
-
+} from "@/components/ui/card";
+import { useGetAppointmentsStatusQuery, useGetSummaryQuery } from "@/app/store/features/analysis/analysisApi";
 export function SectionCards() {
-  return (
-    <div className="*:data-[slot=card]:bg-muted *:data-[slot=card]:rounded-md *:data-[slot=card]:border *:data-[slot=card]:shadow-none hover:bg-whtie/50 grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+  // Fetch summary and appointments data from backend
+  const { data: summary, isLoading: summaryLoading } = useGetSummaryQuery();
+  const { data: appointmentsStatus } = useGetAppointmentsStatusQuery();
 
-        {stats.map((stat, i) => (
+  // While loading, show placeholder or zero
+  const stats = [
+    {
+      title: "Total Patients",
+      value: summary?.patientsCount ?? 0,
+      change: ((summary?.patientsCount ?? 0) / 100), 
+      trend: "up",
+      description: "Total Patients Register",
+      subtext: "Visitors for the last 6 months",
+      bg: "bg-black",
+    },
+    {
+      title: "Total Doctors",
+      value: summary?.doctorsCount ?? 0,
+      change: ((summary?.doctorsCount ?? 0) / 100),
+      trend: "up",
+      description: "Total Doctor Register",
+      subtext: "Comfined By System Admin",
+      bg: "bg-white/80",
+    },
+    {
+      title: "Total Appointments",
+      value: summary?.appointmentsCount ?? 0,
+      change: ((summary?.appointmentsCount ?? 0) / 100),
+      trend: "up",
+      description: "Appointments are increasing",
+      subtext: "Based On All Appointments",
+      bg: "bg-white/80",
+    },
+    {
+      title: "Total Files",
+      value: summary?.filesCount ?? 0,
+      change:((summary?.filesCount ?? 0) / 100),
+      trend: "up",
+      description: "File uploads are growing",
+      subtext: "Storage activity",
+      bg: "bg-white/80",
+    },
+  ];
+
+  if (summaryLoading) return <p>Loading analytics...</p>;
+
+  return (
+    <div className="*:data-[slot=card]:bg-muted *:data-[slot=card]:rounded-md *:data-[slot=card]:border *:data-[slot=card]:shadow-none hover:bg-white/50 grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      {stats.map((stat, i) => (
         <Card key={i} className={`${stat.bg} rounded-md shadow-sm`}>
           <CardHeader>
             <CardDescription>{stat.title}</CardDescription>
@@ -80,5 +87,5 @@ export function SectionCards() {
         </Card>
       ))}
     </div>
-  )
+  );
 }

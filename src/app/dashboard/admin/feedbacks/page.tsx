@@ -7,82 +7,141 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-
-// Sample feedback data
-const feedbackList = [
-  { id: 1, patient: "John Doe", doctor: "Dr. Alice Smith", feedback: "Great service, very attentive.", date: "2025-09-10", rating: 5 },
-  { id: 2, patient: "Jane Smith", doctor: "Dr. Bob Jones", feedback: "Waiting time was long.", date: "2025-09-12", rating: 3 },
-  { id: 3, patient: "Michael Brown", doctor: "Dr. Carol Lee", feedback: "Excellent care!", date: "2025-09-15", rating: 5 },
-]
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogClose } from "@/components/ui/dialog"
+import { useGetUsersQuery } from "@/app/store/features/users/userApi"
 
 export default function FeedbackListPage() {
   const [search, setSearch] = React.useState("")
+  const [minRating, setMinRating] = React.useState<number | "">("")
+  const [roleFilter, setRoleFilter] = React.useState<"-" | "Patient" | "Doctor">("")
 
-  const filteredData = feedbackList.filter(
-    (item) =>
-      item.patient.toLowerCase().includes(search.toLowerCase()) ||
-      item.doctor.toLowerCase().includes(search.toLowerCase())
-  )
+  const { data: usersData, isLoading } = useGetUsersQuery()
+
+  const filteredData = React.useMemo(() => {
+    if (!usersData) return []
+
+    return usersData.filter((user) => {
+      const matchesSearch = user.name.toLowerCase().includes(search.toLowerCase())
+      const matchesRating = minRating === "" || user.rating >= minRating
+      const matchesRole = roleFilter === "-" || user.role === roleFilter
+      return matchesSearch && matchesRating && matchesRole
+    })
+  }, [usersData, search, minRating, roleFilter])
+
+  if (isLoading) return <div>Loading users...</div>
 
   return (
     <div className="p-4 lg:p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Patient Feedback</h1>
+      <h1 className="text-2xl font-bold">User Feedback / Ratings</h1>
 
-      {/* Search */}
+      {/* Filters */}
       <div className="flex flex-col md:flex-row items-start md:items-end gap-4">
         <div className="flex-1">
-          <Label htmlFor="search">Search Feedback</Label>
+          <Label htmlFor="search">Search by Name</Label>
           <Input
             id="search"
-            placeholder="Search by patient or doctor..."
+            placeholder="Search by name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+        </div>
+
+        <div className="flex-1">
+          <Label htmlFor="minRating">Minimum Rating</Label>
+          <Input
+            id="minRating"
+            type="number"
+            min={0}
+            max={5}
+            placeholder="Filter by rating..."
+            value={minRating}
+            onChange={(e) => setMinRating(e.target.value === "" ? "" : Number(e.target.value))}
+          />
+        </div>
+
+        <div className="flex-1">
+          <Label htmlFor="roleFilter">Role</Label>
+          <Select
+            value={roleFilter || ""}
+            onValueChange={(value) => setRoleFilter(value === "" ? "-" : (value as "Patient" | "Doctor"))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="-">All</SelectItem>
+              <SelectItem value="Patient">Patient</SelectItem>
+              <SelectItem value="Doctor">Doctor</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       <Separator />
 
-      {/* Feedback Table */}
+      {/* Table */}
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Patient</TableHead>
-            <TableHead>Doctor</TableHead>
-            <TableHead>Feedback</TableHead>
-            <TableHead>Date</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead>Rating</TableHead>
+            <TableHead>Created At</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {filteredData.length > 0 ? (
-            filteredData.map((record) => (
-              <TableRow key={record.id}>
-                <TableCell>{record.patient}</TableCell>
-                <TableCell>{record.doctor}</TableCell>
-                <TableCell>{record.feedback}</TableCell>
-                <TableCell>{record.date}</TableCell>
+            filteredData.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.role}</TableCell>
+                <TableCell>{user.status}</TableCell>
                 <TableCell>
-                  <Badge variant={record.rating >= 4 ? "default" : "outline"}>
-                    {record.rating} ⭐
+                  <Badge variant={user.rating >= 4 ? "default" : "outline"}>
+                    {user.rating} ⭐
                   </Badge>
                 </TableCell>
+                <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => alert(`Viewing feedback from ${record.patient}`)}
-                  >
-                    View
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="outline">View</Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>User Details</DialogTitle>
+                        <DialogDescription>
+                          Detailed info about {user.name}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-2 mt-4">
+                        <p><strong>Name:</strong> {user.name}</p>
+                        <p><strong>Email:</strong> {user.email}</p>
+                        <p><strong>Role:</strong> {user.role}</p>
+                        <p><strong>Status:</strong> {user.status}</p>
+                        <p><strong>Rating:</strong> {user.rating} ⭐</p>
+                        <p><strong>Created At:</strong> {new Date(user.createdAt).toLocaleString()}</p>
+                        <p><strong>Updated At:</strong> {new Date(user.updatedAt).toLocaleString()}</p>
+                      </div>
+                      <div className="mt-4 flex justify-end">
+                        <DialogClose asChild>
+                          <Button variant="outline">Close</Button>
+                        </DialogClose>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-4">
-                No feedback found.
+              <TableCell colSpan={7} className="text-center py-4">
+                No users found.
               </TableCell>
             </TableRow>
           )}

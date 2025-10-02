@@ -3,47 +3,34 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Activity, FileText, Calendar, Pill, Heart } from "lucide-react"
+import { useGetAppointmentsByPatientQuery } from "@/app/store/features/appointment/appointmentApi"
 
-const activities = [
-  {
-    id: 1,
-    type: "medication",
-    title: "Medication taken",
-    description: "Lisinopril 10mg",
-    time: "2 hours ago",
-    icon: Pill,
-    status: "completed",
-  },
-  {
-    id: 2,
-    type: "appointment",
-    title: "Appointment scheduled",
-    description: "Dr. Smith - Cardiology",
-    time: "1 day ago",
-    icon: Calendar,
-    status: "scheduled",
-  },
-  {
-    id: 3,
-    type: "vitals",
-    title: "Vitals recorded",
-    description: "Blood pressure: 120/80",
-    time: "2 days ago",
-    icon: Heart,
-    status: "normal",
-  },
-  {
-    id: 4,
-    type: "report",
-    title: "Lab results available",
-    description: "Blood work - All normal",
-    time: "3 days ago",
-    icon: FileText,
-    status: "available",
-  },
-]
+interface RecentActivityProps {
+  patientId: number | undefined
+}
 
-export function RecentActivity() {
+export function RecentActivity({ patientId }: RecentActivityProps) {
+  // Fetch appointments for this patient
+  const { data: appointments, isLoading } = useGetAppointmentsByPatientQuery(patientId)
+
+  // Transform appointments to activity format (only "done" status)
+  const appointmentActivities = appointments
+    ?.filter((appt) => (appt.status).toLocaleLowerCase() === "done")
+    .map((appt) => ({
+      id: appt.id,
+      type: "appointment",
+      title: "Appointment completed",
+      description: `Dr. ${appt.doctor?.user?.name} - ${appt.description ?? "No description"}`,
+      time: new Date(appt.date).toLocaleString(),
+      icon: Calendar,
+      status: "done",
+    })) ?? []
+
+  console.log(appointments )
+  const activities = [...appointmentActivities]
+
+  if (isLoading) return <p>Loading activities...</p>
+
   return (
     <Card>
       <CardHeader>

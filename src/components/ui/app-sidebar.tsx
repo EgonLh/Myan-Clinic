@@ -60,6 +60,11 @@ const data = {
       icon: IconListDetails,
     },
     {
+      title: "Department",
+      url: "/dashboard/admin/department",
+      icon: IconInnerShadowTop,
+    },
+    {
       title: "Permissions",
       url: "/dashboard/admin/permissions",
       icon: IconFolder,
@@ -89,8 +94,8 @@ const data = {
       icon: IconReport,
     },
     {
-      name: "Doctoral Information",
-      url: "/dashboard/admin/doctoral-information",
+      name: "Appointments",
+      url: "/dashboard/admin/appointments",
       icon: IconFileWord,
     },
   ],

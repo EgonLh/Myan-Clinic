@@ -11,28 +11,28 @@ const features = [
     id: 1,
     title: "Appointment Booking",
     description: "Manage all doctor appointments and patient schedules easily.",
-    image: "/images/booking.jpg",
+    image: "https://i.pinimg.com/736x/b3/d2/5b/b3d25ba3fc965fc79cc1a378b4a33eff.jpg",
     details: "Allows admin to create, edit, and cancel appointments. Includes notifications and reminders for patients and doctors.",
   },
   {
     id: 2,
     title: "Patient Records",
     description: "Store and manage patient medical history and reports.",
-    image: "/images/patient_records.jpg",
+    image: "https://i.pinimg.com/736x/33/ce/cf/33cecf7be7418e30ddc22a0e7e1e1985.jpg",
     details: "View, search, and update patient medical records securely. Supports exporting as PDF, CSV, or JSON.",
   },
   {
     id: 3,
     title: "Doctor Management",
     description: "Manage doctor profiles, roles, and permissions.",
-    image: "/images/doctor_management.jpg",
+    image: "https://i.pinimg.com/1200x/d6/83/c8/d683c89dbd27434259fccdd381dccb27.jpg",
     details: "Assign roles and permissions, update doctor profiles, track performance, and handle schedules.",
   },
   {
     id: 4,
     title: "Analytics Dashboard",
     description: "Visualize hospital performance and patient statistics.",
-    image: "/images/analytics.jpg",
+    image: "https://i.pinimg.com/1200x/f8/5e/15/f85e155b50c7f776a6f6cd57e489fa2c.jpg",
     details: "Interactive charts, patient trends, appointment statistics, and KPI tracking for admins.",
   },
 ]
@@ -65,8 +65,15 @@ export default function FeatureManagementPage() {
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle>{feature.title}</DialogTitle>
-                <DialogDescription>{feature.details}</DialogDescription>
               </DialogHeader>
+              <div className="mt-4">
+                <img
+                  src={feature.image}
+                  alt={feature.title}
+                  className="w-full h-64 object-cover rounded-md"
+                />
+                <p className="mt-4 text-sm text-muted-foreground">{feature.details}</p>
+              </div>
               <div className="mt-4 flex justify-end">
                 <DialogClose asChild>
                   <Button variant="outline">Close</Button>

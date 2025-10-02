@@ -18,8 +18,14 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
 import { z } from "zod"
 import { toast } from "sonner"
+
+import {
+  useUpdateAppointmentMutation,
+  useDeleteAppointmentMutation,
+} from "@/app/store/features/appointment/appointmentApi"
 
 export const appointmentSchema = z.object({
   id: z.number(),
@@ -58,18 +64,31 @@ const columns: ColumnDef<z.infer<typeof appointmentSchema>>[] = [
     accessorKey: "notes",
     header: "Notes",
     cell: ({ row }) => (
-      <Button
-        variant="link"
-        size="sm"
-        onClick={() => toast.info(row.original.notes ?? "No notes")}
-      >
-        View
-      </Button>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="link" size="sm">
+            View
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Appointment Notes</DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">
+            {row.original.notes ? row.original.notes : "No notes available."}
+          </div>
+          <div className="mt-4 flex justify-end">
+            <DialogClose asChild>
+              <Button>Close</Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
     ),
   },
 ]
 
-export function AppointmentTable() {
+export default function AppointmentTable() {
   const { data: appointmentsData, isLoading } = useGetAppointmentsQuery()
   const { data: doctorsData } = useGetDoctorsQuery()
 
@@ -77,10 +96,12 @@ export function AppointmentTable() {
     patientName: "",
     doctorName: "",
     status: "",
-    departmentId:"",
+    departmentId: "",
   })
 
-  // Create a map of departmentId => departmentName for quick lookup
+  const [updateAppointment] = useUpdateAppointmentMutation()
+  const [deleteAppointment] = useDeleteAppointmentMutation()
+
   const departmentMap = React.useMemo(() => {
     const map: Record<number, string> = {};
     (doctorsData ?? []).forEach((doc) => {
@@ -90,8 +111,6 @@ export function AppointmentTable() {
     });
     return map;
   }, [doctorsData])
-
-  console.log("departmetMap",departmentMap)
 
   const tableData = React.useMemo(() => {
     let data = (appointmentsData ?? []).map((appt) => ({
@@ -110,10 +129,8 @@ export function AppointmentTable() {
       data = data.filter((d) => d.doctorName.toLowerCase().includes(filters.doctorName.toLowerCase()))
     if (filters.status)
       data = data.filter((d) => d.status === filters.status)
-    if (filters.departmentId){
-      console.log("before :",filters.departmentId)
+    if (filters.departmentId)
       data = data.filter((d) => String(d.doctorDepartment) === filters.departmentId)
-      console.log("After",data)}
 
     return data
   }, [appointmentsData, filters, departmentMap])
@@ -123,9 +140,53 @@ export function AppointmentTable() {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
+  const allColumns = React.useMemo(() => {
+    return [
+      ...columns,
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }: any) => (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={async () => {
+                try {
+                  await updateAppointment({ id: row.original.id, body: { status: "Done" } }).unwrap()
+                  toast.success("Appointment updated to Done")
+                } catch {
+                  toast.error("Failed to update appointment")
+                }
+              }}
+            >
+              Done
+            </Button>
+
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={async () => {
+                if (!confirm("Are you sure you want to delete this appointment?")) return
+                try {
+                  await deleteAppointment(row.original.id).unwrap()
+                  toast.success("Appointment deleted")
+                } catch {
+                  toast.error("Failed to delete appointment")
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </div>
+        ),
+      },
+    ]
+  }, [updateAppointment, deleteAppointment])
+
   const table = useReactTable({
     data: tableData,
-    columns,
+    columns: allColumns,
     state: {
       sorting,
       columnFilters,
@@ -234,7 +295,7 @@ export function AppointmentTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="text-center py-4">
+                <TableCell colSpan={allColumns.length} className="text-center py-4">
                   No appointments found.
                 </TableCell>
               </TableRow>
