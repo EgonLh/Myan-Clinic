@@ -33,6 +33,11 @@ const navigation = [
     href: "/dashboard/doctor/setting",
     icon: Settings,
   },
+  {
+    name: "Avaliable",
+    href: "/dashboard/doctor/Assigned",
+    icon: Settings,
+  }
 ]
 
 export function Sidebar() {

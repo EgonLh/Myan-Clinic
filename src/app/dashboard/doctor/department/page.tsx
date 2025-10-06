@@ -1,78 +1,49 @@
-import { Sidebar } from "@/components/doctors/siderbar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Plus, Building2, Users, UserCheck, Activity } from "lucide-react"
+"use client";
 
-const departments = [
-  {
-    id: "1",
-    name: "Cardiology",
-    head: "Dr. Michael Chen",
-    staff: 12,
-    patients: 45,
-    status: "active",
-    location: "Building A, Floor 3",
-    phone: "+1 (555) 123-4567",
-  },
-  {
-    id: "2",
-    name: "Emergency Medicine",
-    head: "Dr. Sarah Johnson",
-    staff: 18,
-    patients: 78,
-    status: "active",
-    location: "Building B, Ground Floor",
-    phone: "+1 (555) 234-5678",
-  },
-  {
-    id: "3",
-    name: "Pediatrics",
-    head: "Dr. Emily Rodriguez",
-    staff: 8,
-    patients: 32,
-    status: "active",
-    location: "Building C, Floor 2",
-    phone: "+1 (555) 345-6789",
-  },
-  {
-    id: "4",
-    name: "Orthopedics",
-    head: "Dr. James Wilson",
-    staff: 10,
-    patients: 28,
-    status: "maintenance",
-    location: "Building A, Floor 2",
-    phone: "+1 (555) 456-7890",
-  },
-  {
-    id: "5",
-    name: "Neurology",
-    head: "Dr. Lisa Thompson",
-    staff: 6,
-    patients: 19,
-    status: "active",
-    location: "Building B, Floor 4",
-    phone: "+1 (555) 567-8901",
-  },
-  {
-    id: "6",
-    name: "Radiology",
-    head: "Dr. Robert Kim",
-    staff: 14,
-    patients: 56,
-    status: "active",
-    location: "Building C, Basement",
-    phone: "+1 (555) 678-9012",
-  },
-]
+import { Sidebar } from "@/components/doctors/siderbar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Search, Plus, Building2, Users, UserCheck, Activity } from "lucide-react";
+import { useGetDepartmentsQuery } from "@/app/store/features/department/departmentApi";
 
 export default function DepartmentsPage() {
-  const totalStaff = departments.reduce((sum, dept) => sum + dept.staff, 0)
-  const totalPatients = departments.reduce((sum, dept) => sum + dept.patients, 0)
-  const activeDepartments = departments.filter((dept) => dept.status === "active").length
+  // ✅ Fetch departments from API
+  const { data: departments = [], isLoading, isError } = useGetDepartmentsQuery();
+
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading departments...</p>
+      </div>
+    );
+
+  if (isError)
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500">
+        <p>Failed to load departments.</p>
+      </div>
+    );
+
+  // ✅ Calculate stats
+  const totalStaff = departments.reduce((sum, dept) => sum + (dept.doctors?.length || 0), 0);
+  const totalPatients = departments.reduce((sum, dept) => sum + (dept.patients || 0), 0); // Assuming backend returns patient count if available
+  const activeDepartments = departments.length; // You can add a status field check if your backend provides it
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -161,10 +132,7 @@ export default function DepartmentsPage() {
                       <TableHead>Department</TableHead>
                       <TableHead>Department Head</TableHead>
                       <TableHead>Staff Count</TableHead>
-                      <TableHead>Patients</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Phone</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Doctors</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -172,23 +140,10 @@ export default function DepartmentsPage() {
                     {departments.map((department) => (
                       <TableRow key={department.id}>
                         <TableCell className="font-medium">{department.name}</TableCell>
-                        <TableCell>{department.head}</TableCell>
-                        <TableCell>{department.staff}</TableCell>
-                        <TableCell>{department.patients}</TableCell>
-                        <TableCell>{department.location}</TableCell>
-                        <TableCell>{department.phone}</TableCell>
+                        <TableCell>{department.head || "N/A"}</TableCell>
+                        <TableCell>{department.staff || department.doctors?.length || 0}</TableCell>
                         <TableCell>
-                          <Badge
-                            variant={
-                              department.status === "active"
-                                ? "default"
-                                : department.status === "maintenance"
-                                  ? "secondary"
-                                  : "destructive"
-                            }
-                          >
-                            {department.status}
-                          </Badge>
+                          {department.doctors?.map((doc) => doc.type).join(", ") || "N/A"}
                         </TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="sm">
@@ -205,5 +160,5 @@ export default function DepartmentsPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

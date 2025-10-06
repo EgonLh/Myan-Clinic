@@ -1,97 +1,66 @@
-import { Sidebar } from "@/components/doctors/siderbar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Plus, Users, UserPlus, Heart, AlertTriangle } from "lucide-react"
+"use client";
 
-const patients = [
-  {
-    id: "1",
-    name: "John Smith",
-    age: 45,
-    gender: "Male",
-    phone: "+1 (555) 123-4567",
-    email: "john.smith@email.com",
-    condition: "Hypertension",
-    status: "stable",
-    lastVisit: "2024-01-10",
-    nextAppointment: "2024-01-20",
-    room: "A-201",
-  },
-  {
-    id: "2",
-    name: "Emily Davis",
-    age: 32,
-    gender: "Female",
-    phone: "+1 (555) 234-5678",
-    email: "emily.davis@email.com",
-    condition: "Diabetes Type 2",
-    status: "monitoring",
-    lastVisit: "2024-01-12",
-    nextAppointment: "2024-01-18",
-    room: "B-105",
-  },
-  {
-    id: "3",
-    name: "Michael Brown",
-    age: 67,
-    gender: "Male",
-    phone: "+1 (555) 345-6789",
-    email: "michael.brown@email.com",
-    condition: "Heart Disease",
-    status: "critical",
-    lastVisit: "2024-01-14",
-    nextAppointment: "2024-01-16",
-    room: "ICU-3",
-  },
-  {
-    id: "4",
-    name: "Sarah Wilson",
-    age: 28,
-    gender: "Female",
-    phone: "+1 (555) 456-7890",
-    email: "sarah.wilson@email.com",
-    condition: "Pregnancy",
-    status: "stable",
-    lastVisit: "2024-01-13",
-    nextAppointment: "2024-01-27",
-    room: "C-302",
-  },
-  {
-    id: "5",
-    name: "Robert Johnson",
-    age: 55,
-    gender: "Male",
-    phone: "+1 (555) 567-8901",
-    email: "robert.johnson@email.com",
-    condition: "Arthritis",
-    status: "stable",
-    lastVisit: "2024-01-11",
-    nextAppointment: "2024-01-25",
-    room: "A-150",
-  },
-  {
-    id: "6",
-    name: "Lisa Anderson",
-    age: 41,
-    gender: "Female",
-    phone: "+1 (555) 678-9012",
-    email: "lisa.anderson@email.com",
-    condition: "Migraine",
-    status: "recovering",
-    lastVisit: "2024-01-09",
-    nextAppointment: "2024-01-22",
-    room: "B-220",
-  },
-]
+import { Sidebar } from "@/components/doctors/siderbar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Search, Plus, Users, UserPlus, Heart, AlertTriangle } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/store/store";
+import { useGetAppointmentsByDoctorQuery } from "@/app/store/features/appointment/appointmentApi";
 
 export default function PatientsPage() {
-  const totalPatients = patients.length
-  const criticalPatients = patients.filter((p) => p.status === "critical").length
-  const stablePatients = patients.filter((p) => p.status === "stable").length
-  const monitoringPatients = patients.filter((p) => p.status === "monitoring").length
+  const doctorId = useSelector((state: RootState) => state.doctor.id);
+
+  // Show loading while doctorId is not available
+  if (!doctorId) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading doctor data...</p>
+      </div>
+    );
+  }
+
+  // Fetch appointments for this doctor
+  const {
+    data: appointments = [],
+    isLoading,
+    isError,
+  } = useGetAppointmentsByDoctorQuery(doctorId, { skip: !doctorId });
+
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading appointments...</p>
+      </div>
+    );
+
+  if (isError)
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500">
+        <p>Failed to load appointments.</p>
+      </div>
+    );
+
+  const totalPatients = appointments.length;
+  const criticalPatients = appointments.filter(a => a.status === "critical").length;
+  const stablePatients = appointments.filter(a => a.status === "stable").length;
+  const monitoringPatients = appointments.filter(a => a.status === "monitoring").length;
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -189,34 +158,32 @@ export default function PatientsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {patients.map((patient) => (
-                      <TableRow key={patient.id}>
-                        <TableCell className="font-medium">{patient.name}</TableCell>
-                        <TableCell>{patient.age}</TableCell>
-                        <TableCell>{patient.gender}</TableCell>
-                        <TableCell>{patient.condition}</TableCell>
-                        <TableCell>{patient.room}</TableCell>
+                    {appointments.map((appointment) => (
+                      <TableRow key={appointment.id}>
+                        <TableCell className="font-medium">{appointment.patient?.user?.name || "N/A"}</TableCell>
+                        <TableCell>{appointment.patient?.age || "N/A"}</TableCell>
+                        <TableCell>{appointment.patient?.gender || "N/A"}</TableCell>
+                        <TableCell>{appointment.type || "N/A"}</TableCell>
+                        <TableCell>{appointment.room || "N/A"}</TableCell>
                         <TableCell>
                           <Badge
                             variant={
-                              patient.status === "stable"
+                              appointment.status === "stable"
                                 ? "default"
-                                : patient.status === "critical"
+                                : appointment.status === "critical"
                                   ? "destructive"
-                                  : patient.status === "monitoring"
+                                  : appointment.status === "monitoring"
                                     ? "secondary"
                                     : "outline"
                             }
                           >
-                            {patient.status}
+                            {appointment.status}
                           </Badge>
                         </TableCell>
-                        <TableCell>{patient.lastVisit}</TableCell>
-                        <TableCell>{patient.nextAppointment}</TableCell>
+                        <TableCell>{appointment.lastVisit || "N/A"}</TableCell>
+                        <TableCell>{appointment.nextAppointment || "N/A"}</TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            View Details
-                          </Button>
+                          <Button variant="ghost" size="sm">View Details</Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -228,5 +195,5 @@ export default function PatientsPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import authReducer from './features/auth/authSlice'
+import doctorReducer from './features/doctor/doctorSlice'
 import { authApi } from './features/auth/authApi'
 import { doctorApi } from './features/doctor/doctorApi'
 import { patientApi } from './features/patient/patientApi'
@@ -12,6 +13,7 @@ import { fileApi } from './features/files/FileApi'
 export const store = configureStore({
   reducer: {
     auth:authReducer,
+    doctor:doctorReducer,
     [authApi.reducerPath]: authApi.reducer,
     [doctorApi.reducerPath]:doctorApi.reducer,
     [patientApi.reducerPath]: patientApi.reducer,

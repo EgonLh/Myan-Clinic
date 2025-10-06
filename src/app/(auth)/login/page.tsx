@@ -54,8 +54,19 @@ export default function LoginPage() {
       toast.success("Login Succeed", {
         description: `You Are login in as `,
       })
+      // console.log(result)
+      switch (result?.user?.role) {
+        case "Root":
+          router.push('dashboard')
+          break;
+        case "Doctor":
+          router.push('dashboard/doctor')
+          break;
+        default:
+          router.push('dashboard/patient')
+          break;
+      }
 
-      router.push('dashboard/patient')
     } catch (err: any) {
       console.log(err)
       toast.error("Login failed", {

@@ -1,51 +1,65 @@
-import { Sidebar } from "@/components/doctors/siderbar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Plus, Calendar, Clock, User } from "lucide-react"
+"use client";
 
-const appointments = [
-  {
-    id: "1",
-    patient: "John Smith",
-    time: "09:00 AM",
-    date: "2024-01-15",
-    type: "Consultation",
-    status: "confirmed",
-    duration: "30 min",
-  },
-  {
-    id: "2",
-    patient: "Emily Davis",
-    time: "10:30 AM",
-    date: "2024-01-15",
-    type: "Follow-up",
-    status: "pending",
-    duration: "15 min",
-  },
-  {
-    id: "3",
-    patient: "Michael Brown",
-    time: "02:00 PM",
-    date: "2024-01-15",
-    type: "Check-up",
-    status: "confirmed",
-    duration: "45 min",
-  },
-  {
-    id: "4",
-    patient: "Sarah Wilson",
-    time: "03:30 PM",
-    date: "2024-01-15",
-    type: "Consultation",
-    status: "cancelled",
-    duration: "30 min",
-  },
-]
+import { Sidebar } from "@/components/doctors/siderbar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Search, Plus, Calendar, Clock, User } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/store/store";
+import { useGetAppointmentsByDoctorQuery } from "@/app/store/features/appointment/appointmentApi";
 
 export default function AppointmentsPage() {
+  // ✅ Get doctor id from Redux store
+  const doctorId = useSelector((state: RootState) => state.doctor.id);
+  console.log("doctor id",doctorId)
+  // ✅ Show loading while doctorId is not available
+  if (!doctorId) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading doctor data...</p>
+      </div>
+    );
+  }
+
+  // ✅ Fetch appointments for this doctor
+  const {
+    data: appointments = [],
+    isLoading,
+    isError,
+  } = useGetAppointmentsByDoctorQuery(doctorId, {
+    skip: !doctorId, // Skip query if doctorId is not ready
+  });
+
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading appointments...</p>
+      </div>
+    );
+
+  if (isError)
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500">
+        <p>Failed to load appointments.</p>
+      </div>
+    );
+
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
@@ -72,8 +86,8 @@ export default function AppointmentsPage() {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">12</div>
-                <p className="text-xs text-muted-foreground">+2 from yesterday</p>
+                <div className="text-2xl font-bold">{appointments.length}</div>
+                <p className="text-xs text-muted-foreground">Fetched from API</p>
               </CardContent>
             </Card>
 
@@ -83,8 +97,10 @@ export default function AppointmentsPage() {
                 <User className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">8</div>
-                <p className="text-xs text-muted-foreground">67% of total</p>
+                <div className="text-2xl font-bold">
+                  {appointments.filter((a) => a.status === "confirmed").length}
+                </div>
+                <p className="text-xs text-muted-foreground">Confirmed</p>
               </CardContent>
             </Card>
 
@@ -94,7 +110,9 @@ export default function AppointmentsPage() {
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">3</div>
+                <div className="text-2xl font-bold">
+                  {appointments.filter((a) => a.status === "pending").length}
+                </div>
                 <p className="text-xs text-muted-foreground">Awaiting confirmation</p>
               </CardContent>
             </Card>
@@ -105,8 +123,10 @@ export default function AppointmentsPage() {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">1</div>
-                <p className="text-xs text-muted-foreground">8% cancellation rate</p>
+                <div className="text-2xl font-bold">
+                  {appointments.filter((a) => a.status === "cancelled").length}
+                </div>
+                <p className="text-xs text-muted-foreground">Cancelled</p>
               </CardContent>
             </Card>
           </div>
@@ -142,19 +162,21 @@ export default function AppointmentsPage() {
                   <TableBody>
                     {appointments.map((appointment) => (
                       <TableRow key={appointment.id}>
-                        <TableCell className="font-medium">{appointment.patient}</TableCell>
-                        <TableCell>{appointment.date}</TableCell>
-                        <TableCell>{appointment.time}</TableCell>
-                        <TableCell>{appointment.type}</TableCell>
-                        <TableCell>{appointment.duration}</TableCell>
+                        <TableCell className="font-medium">
+                          {appointment.patient?.user?.name || "N/A"}
+                        </TableCell>
+                        <TableCell>{appointment?.date}</TableCell>
+                        <TableCell>{appointment?.time}</TableCell>
+                        <TableCell>{appointment?.type}</TableCell>
+                        <TableCell>{appointment?.duration}</TableCell>
                         <TableCell>
                           <Badge
                             variant={
                               appointment.status === "confirmed"
                                 ? "default"
                                 : appointment.status === "pending"
-                                  ? "secondary"
-                                  : "destructive"
+                                ? "secondary"
+                                : "destructive"
                             }
                           >
                             {appointment.status}
@@ -175,5 +197,5 @@ export default function AppointmentsPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

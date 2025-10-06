@@ -39,7 +39,16 @@ export const appointmentApi = createApi({
             ]
           : [{ type: "Appointment", id: "LIST" }],
     }),
-
+    getAppointmentsByDoctor: builder.query<Appointment[], number>({
+      query: (doctorId) => `/appointments/doctor/${doctorId}`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: "Appointment" as const, id })),
+              { type: "Appointment", id: "LIST" },
+            ]
+          : [{ type: "Appointment", id: "LIST" }],
+    }),
     createAppointment: builder.mutation<Appointment, CreateAppointmentRequest>({
       query: (body) => {
         const formData = new FormData();
@@ -80,6 +89,7 @@ export const {
   useGetAppointmentsQuery,
   useGetAppointmentByIdQuery,
   useGetAppointmentsByPatientQuery,
+  useGetAppointmentsByDoctorQuery,
   useCreateAppointmentMutation,
   useUpdateAppointmentMutation,
   useDeleteAppointmentMutation,
