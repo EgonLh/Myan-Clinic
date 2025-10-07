@@ -6,6 +6,7 @@ import { CreatePatientRequest, Doctor } from "./doctor.type"
 
 // ----------------------
 export interface User {
+  gender: string
   id: number
   name: string
   username: string

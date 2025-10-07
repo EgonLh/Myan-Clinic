@@ -1,107 +1,202 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import type { Task } from "@/types/task"
+import { useState } from "react";
+import { useFormik } from "formik";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { useGetDoctorsQuery } from "@/app/store/features/doctor/doctorApi";
+import { useGetPatientsQuery } from "@/app/store/features/patient/patientApi";
+import {
+  useGetAppointmentsByDoctorQuery,
+  useCreateAppointmentMutation,
+} from "@/app/store/features/appointment/appointmentApi";
 
 interface TaskFormProps {
-  isOpen: boolean
-  onClose: () => void
-  onSubmit: (task: Omit<Task, "id">) => void
-  initialTask?: Task
-  selectedDate?: string
+  isOpen: boolean;
+  onClose: () => void;
+  selectedDate?: string;
 }
 
-export function TaskForm({ isOpen, onClose, onSubmit, initialTask, selectedDate }: TaskFormProps) {
-  const [formData, setFormData] = useState({
-    title: initialTask?.title || "",
-    description: initialTask?.description || "",
-    time: initialTask?.time || "",
-    date: initialTask?.date || selectedDate || "",
-    type: initialTask?.type || ("appointment" as Task["type"]),
-    priority: initialTask?.priority || ("medium" as Task["priority"]),
-    patient: initialTask?.patient || "",
-    status: initialTask?.status || ("pending" as Task["status"]),
-  })
+export function TaskForm({ isOpen, onClose, selectedDate }: TaskFormProps) {
+  const { data: doctors = [] } = useGetDoctorsQuery();
+  const { data: patients = [] } = useGetPatientsQuery();
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
+  const { data: appointmentsByDoctor = [] } = useGetAppointmentsByDoctorQuery(
+    selectedDoctorId ? Number(selectedDoctorId) : 0,
+    { skip: !selectedDoctorId }
+  );
+  const [createAppointment] = useCreateAppointmentMutation();
+  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!formData.title || !formData.time || !formData.date) return
-
-    onSubmit(formData)
-    onClose()
-    setFormData({
-      title: "",
-      description: "",
+  const formik = useFormik({
+    initialValues: {
+      patient: "",
+      doctor: "",
+      date: selectedDate || "",
       time: "",
-      date: "",
       type: "appointment",
       priority: "medium",
-      patient: "",
+      description: "",
+      notes: "",
+      costs: "",
       status: "pending",
-    })
-  }
+    },
+    validate: (values) => {
+      const errors: Record<string, string> = {};
 
-  const handleClose = () => {
-    onClose()
-    if (!initialTask) {
-      setFormData({
-        title: "",
-        description: "",
-        time: "",
-        date: "",
-        type: "appointment",
-        priority: "medium",
-        patient: "",
-        status: "pending",
-      })
-    }
-  }
+      // Patient validation
+      const patientObj = patients.find(
+        (p) => p.user.name.toLowerCase() === values.patient.toLowerCase()
+      );
+      if (!patientObj) {
+        errors.patient = "Patient not found in database.";
+      }
+
+      // Doctor validation
+      const doctorObj = doctors.find(
+        (d) => d.user.name.toLowerCase() === values.doctor.toLowerCase()
+      );
+      if (!doctorObj) {
+        errors.doctor = "Doctor not found in database.";
+      }
+
+      // Duplicate date/time validation
+      if (selectedDoctorId && values.date && values.time) {
+        const duplicate = appointmentsByDoctor.find(
+          (appt) => appt.date === values.date && appt.time === values.time
+        );
+        if (duplicate) {
+          errors.time = "Selected doctor is not available at this date/time.";
+        }
+      }
+
+      return errors;
+    },
+    onSubmit: async (values) => {
+      const doctorObj = doctors.find(
+        (d) => d.user.name.toLowerCase() === values.doctor.toLowerCase()
+      );
+      const patientObj = patients.find(
+        (p) => p.user.name.toLowerCase() === values.patient.toLowerCase()
+      );
+
+      if (!doctorObj || !patientObj) return;
+
+      const body: any = {
+        doctorId: doctorObj.id,
+        patientId: patientObj.id,
+        date : values.date,
+        status:values.status,
+        notes:values.notes,
+        invoice:"",
+        description:values.description,
+        
+      };
+
+      if (invoiceFile) body.invoice = invoiceFile;
+
+      try {
+        await createAppointment(body).unwrap();
+        onClose();
+        formik.resetForm();
+        setInvoiceFile(null);
+      } catch (err: any) {
+        alert(err.data?.message || "Failed to create appointment.");
+      }
+    },
+  });
+
+  const filteredPatients = patients.filter((p) =>
+    p.user.name.toLowerCase().includes(formik.values.patient.toLowerCase())
+  );
+
+  const filteredDoctors = doctors.filter((d) =>
+    d.user.name.toLowerCase().includes(formik.values.doctor.toLowerCase())
+  );
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{initialTask ? "Edit Task" : "Create New Task"}</DialogTitle>
+          <DialogTitle>Create Appointment</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
+          {/* Patient */}
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="patient">Patient *</Label>
             <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Enter task title"
+              id="patient"
+              name="patient"
+              value={formik.values.patient}
+              onChange={formik.handleChange}
+              placeholder="Search patient by name"
+              list="patients-list"
               required
             />
+            <datalist id="patients-list">
+              {filteredPatients.map((p) => (
+                <option key={p.id} value={p.user.name} />
+              ))}
+            </datalist>
+            {formik.errors.patient && (
+              <p className="text-red-500 text-sm">{formik.errors.patient}</p>
+            )}
           </div>
 
+          {/* Doctor */}
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Enter task description"
-              rows={3}
+            <Label htmlFor="doctor">Doctor *</Label>
+            <Input
+              id="doctor"
+              name="doctor"
+              value={formik.values.doctor}
+              onChange={(e) => {
+                formik.handleChange(e);
+                const doctor = doctors.find(
+                  (d) => d.user.name.toLowerCase() === e.target.value.toLowerCase()
+                );
+                setSelectedDoctorId(doctor ? doctor.id.toString() : null);
+              }}
+              placeholder="Search doctor by name"
+              list="doctors-list"
+              required
             />
+            <datalist id="doctors-list">
+              {filteredDoctors.map((d) => (
+                <option key={d.id} value={d.user.name} />
+              ))}
+            </datalist>
+            {formik.errors.doctor && (
+              <p className="text-red-500 text-sm">{formik.errors.doctor}</p>
+            )}
           </div>
 
+          {/* Date & Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="date">Date *</Label>
               <Input
                 id="date"
+                name="date"
                 type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                value={formik.values.date}
+                onChange={formik.handleChange}
                 required
               />
             </div>
@@ -109,20 +204,25 @@ export function TaskForm({ isOpen, onClose, onSubmit, initialTask, selectedDate 
               <Label htmlFor="time">Time *</Label>
               <Input
                 id="time"
+                name="time"
                 type="time"
-                value={formData.time}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                value={formik.values.time}
+                onChange={formik.handleChange}
                 required
               />
+              {formik.errors.time && (
+                <p className="text-red-500 text-sm">{formik.errors.time}</p>
+              )}
             </div>
           </div>
 
+          {/* Type & Priority */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="type">Type</Label>
               <Select
-                value={formData.type}
-                onValueChange={(value: Task["type"]) => setFormData({ ...formData, type: value })}
+                value={formik.values.type}
+                onValueChange={(value) => formik.setFieldValue("type", value)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -138,8 +238,8 @@ export function TaskForm({ isOpen, onClose, onSubmit, initialTask, selectedDate 
             <div className="space-y-2">
               <Label htmlFor="priority">Priority</Label>
               <Select
-                value={formData.priority}
-                onValueChange={(value: Task["priority"]) => setFormData({ ...formData, priority: value })}
+                value={formik.values.priority}
+                onValueChange={(value) => formik.setFieldValue("priority", value)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -153,44 +253,82 @@ export function TaskForm({ isOpen, onClose, onSubmit, initialTask, selectedDate 
             </div>
           </div>
 
+          {/* Description */}
           <div className="space-y-2">
-            <Label htmlFor="patient">Patient (Optional)</Label>
-            <Input
-              id="patient"
-              value={formData.patient}
-              onChange={(e) => setFormData({ ...formData, patient: e.target.value })}
-              placeholder="Enter patient name"
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              name="description"
+              value={formik.values.description}
+              onChange={formik.handleChange}
+              placeholder="Enter description"
             />
           </div>
 
-          {initialTask && (
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value: Task["status"]) => setFormData({ ...formData, status: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="in-progress">In Progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea
+              id="notes"
+              name="notes"
+              value={formik.values.notes}
+              onChange={formik.handleChange}
+              placeholder="Enter notes"
+            />
+          </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
+          {/* Costs */}
+          <div className="space-y-2">
+            <Label htmlFor="costs">Costs</Label>
+            <Input
+              id="costs"
+              name="costs"
+              type="number"
+              value={formik.values.costs}
+              onChange={formik.handleChange}
+              placeholder="Enter costs"
+            />
+          </div>
+
+          {/* Status */}
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <Select
+              value={formik.values.status}
+              onValueChange={(value) => formik.setFieldValue("status", value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Invoice */}
+          <div className="space-y-2">
+            <Label htmlFor="invoice">Invoice (file)</Label>
+            <Input
+              id="invoice"
+              type="file"
+              onChange={(e) =>
+                setInvoiceFile(e.target.files ? e.target.files[0] : null)
+              }
+            />
+          </div>
+
+          <DialogFooter className="flex justify-between">
+            <Button variant="outline" type="button" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">{initialTask ? "Update Task" : "Create Task"}</Button>
+            <Button type="submit">Create Appointment</Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

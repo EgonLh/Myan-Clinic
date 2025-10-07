@@ -1,265 +1,250 @@
-import { Sidebar } from "@/components/doctors/siderbar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { Separator } from "@/components/ui/separator"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { User, Mail, Phone, MapPin, Stethoscope, Calendar, Bell, Shield, Palette } from "lucide-react"
+"use client";
+
+import { Sidebar } from "@/components/doctors/siderbar";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Stethoscope, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useGetDoctorByIdQuery, useUpdateDoctorMutation } from "@/app/store/features/doctor/doctorApi";
+import { RootState } from "@/app/store/store";
+import { useUpdateUserMutation } from "@/app/store/features/users/userApi";
+import LoadingPills from "@/components/ui/loading";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const doctorData = useSelector((state: RootState) => state.doctor?.data);
+  const doctorId = doctorData?.id || "";
+
+  const { data: doctor, isLoading } = useGetDoctorByIdQuery(Number(doctorId));
+
+  const [formData, setFormData] = useState({
+    name: "",
+    username: "",
+    email: "",
+    phone: "",
+  });
+
+  const [updateUser] = useUpdateUserMutation();
+  const [updateDoctor] = useUpdateDoctorMutation();
+
+  useEffect(() => {
+    if (doctor) {
+      setFormData({
+        name: doctor.user.name || "",
+        username: doctor.user.username || "",
+        email: doctor.user.email || "",
+        phone: doctor.ph || "",
+      });
+    }
+  }, [doctor]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <LoadingPills message="Loading doctor information..." />
+      </div>
+    );
+  }
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    try {
+      if (!doctor) return;
+
+      // Update user first
+      await updateUser({
+        id: doctor.user.id,
+        body: {
+          name: formData.name,
+          username: formData.username,
+          email: formData.email,
+        },
+      });
+
+      // Update doctor phone
+      await updateDoctor({
+        id: doctorId,
+        body: { ph: formData.phone },
+      });
+
+      setEditMode(false);
+      setDialogOpen(false);
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      console.error("Update failed:", error);
+      toast.error("Failed to update profile.");
+    }
+  };
+
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar />
+    <div className="flex flex-col md:flex-row min-h-screen bg-background text-foreground">
+      {/* Sidebar */}
+      <div
+        className={`fixed z-20 inset-y-0 left-0 w-64 bg-background transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0 transition-transform duration-300 ease-in-out border-r`}
+      >
+        <Sidebar />
+      </div>
 
-      <main className="flex-1 md:ml-64">
-        <div className="p-6 md:p-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-            <p className="text-muted-foreground">Manage your profile and application preferences</p>
-          </div>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 z-10 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Profile Section */}
-            <div className="lg:col-span-2 space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Profile Information
-                  </CardTitle>
-                  <CardDescription>Update your personal and professional details</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Profile Picture */}
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-20 w-20">
-                      <AvatarImage src="/professional-doctor-portrait.png" />
-                      <AvatarFallback className="text-lg">SJ</AvatarFallback>
-                    </Avatar>
-                    <div className="space-y-2">
-                      <Button variant="outline" size="sm">
-                        Change Photo
-                      </Button>
-                      <p className="text-xs text-muted-foreground">JPG, PNG or GIF. Max size 2MB.</p>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  {/* Basic Information */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" defaultValue="Sarah" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" defaultValue="Johnson" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" type="email" defaultValue="sarah.johnson@hospital.com" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input id="phone" defaultValue="+1 (555) 123-4567" />
-                    </div>
-                  </div>
-
-                  {/* Professional Information */}
-                  <Separator />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="specialty">Specialty</Label>
-                      <Input id="specialty" defaultValue="Cardiologist" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="license">Medical License</Label>
-                      <Input id="license" defaultValue="MD-12345-CA" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="department">Department</Label>
-                      <Input id="department" defaultValue="Cardiology" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="experience">Years of Experience</Label>
-                      <Input id="experience" defaultValue="12" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="bio">Professional Bio</Label>
-                    <Textarea
-                      id="bio"
-                      placeholder="Brief description of your medical background and expertise..."
-                      defaultValue="Dr. Sarah Johnson is a board-certified cardiologist with over 12 years of experience in cardiovascular medicine. She specializes in interventional cardiology and has performed over 2,000 cardiac procedures."
-                      rows={4}
-                    />
-                  </div>
-
-                  <Button className="w-full md:w-auto">Save Changes</Button>
-                </CardContent>
-              </Card>
-
-              {/* Notification Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="h-5 w-5" />
-                    Notification Preferences
-                  </CardTitle>
-                  <CardDescription>Configure how you receive notifications</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Email Notifications</Label>
-                      <p className="text-sm text-muted-foreground">Receive notifications via email</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Appointment Reminders</Label>
-                      <p className="text-sm text-muted-foreground">Get reminded about upcoming appointments</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Patient Updates</Label>
-                      <p className="text-sm text-muted-foreground">Notifications for patient status changes</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Emergency Alerts</Label>
-                      <p className="text-sm text-muted-foreground">Critical patient alerts and emergencies</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Security Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    Security & Privacy
-                  </CardTitle>
-                  <CardDescription>Manage your account security settings</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
-                    <Input id="currentPassword" type="password" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="newPassword">New Password</Label>
-                    <Input id="newPassword" type="password" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                    <Input id="confirmPassword" type="password" />
-                  </div>
-                  <Button variant="outline">Update Password</Button>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Two-Factor Authentication</Label>
-                      <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Enable
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Quick Info Sidebar */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Stethoscope className="h-5 w-5" />
-                    Quick Info
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Email</p>
-                      <p className="text-sm text-muted-foreground">sarah.johnson@hospital.com</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Phone</p>
-                      <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Department</p>
-                      <p className="text-sm text-muted-foreground">Cardiology, Floor 3</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Joined</p>
-                      <p className="text-sm text-muted-foreground">January 2020</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Certifications</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <Badge variant="secondary">Board Certified Cardiologist</Badge>
-                  <Badge variant="secondary">Advanced Cardiac Life Support</Badge>
-                  <Badge variant="secondary">Interventional Cardiology</Badge>
-                  <Badge variant="secondary">Echocardiography</Badge>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Palette className="h-5 w-5" />
-                    Appearance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Dark Mode</Label>
-                      <p className="text-sm text-muted-foreground">Toggle dark theme</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+      <main className="flex-1 md:ml-64 p-6 md:p-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+          <h1 className="text-2xl font-bold">Settings</h1>
+          <div className="flex gap-2">
+            <Button onClick={() => setEditMode(!editMode)} variant="outline">
+              {editMode ? "Cancel" : "Edit Profile"}
+            </Button>
+            {editMode && (
+              <Button onClick={() => setDialogOpen(true)}>
+                Save Changes
+              </Button>
+            )}
           </div>
         </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Profile Card */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="border rounded-md shadow-sm hover:shadow-md transition-all">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" /> Profile Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <Separator />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Full Name</Label>
+                    <Input
+                      value={formData.name}
+                      readOnly={!editMode}
+                      onChange={(e) => handleChange("name", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Username</Label>
+                    <Input
+                      value={formData.username}
+                      readOnly={!editMode}
+                      onChange={(e) => handleChange("username", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email</Label>
+                    <Input value={formData.email} readOnly />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Phone</Label>
+                    <Input
+                      value={formData.phone}
+                      readOnly={!editMode}
+                      onChange={(e) => handleChange("phone", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Department</Label>
+                    <Input value={doctor.department?.name || ""} readOnly />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Info Sidebar */}
+          <div className="space-y-6">
+            <Card className="border rounded-md shadow-sm hover:shadow-md transition-all overflow-hidden">
+              {/* Cover Gradient */}
+              <div className="h-28 w-full bg-gradient-to-r from-red-500 via-pink-500 to-blue-600 relative">
+                {/* Optional subtle noise */}
+                <div
+                  className="absolute inset-0 opacity-10"
+                  style={{
+                    backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'4\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")',
+                  }}
+                />
+              </div>
+
+              {/* Card Header */}
+              <CardHeader className="pt-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Stethoscope className="h-5 w-5" /> Quick Info
+                </CardTitle>
+              </CardHeader>
+
+              {/* Card Content */}
+              <CardContent className="space-y-4 text-sm text-muted-foreground">
+                {[
+                  { label: "Email", value: doctor.user.email },
+                  { label: "Phone", value: doctor.ph },
+                  { label: "Department", value: doctor.department?.name },
+                  { label: "Status", value: doctor.user.status },
+                ].map((item, idx) => (
+                  <div key={idx} className="flex justify-between">
+                    <span>{item.label}</span>
+                    <span className="font-medium">{item.value}</span>
+                  </div>
+                ))}
+              </CardContent>
+
+              {/* Footer: Copy Email */}
+              <div className="border-t px-4 py-2 flex justify-end">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigator.clipboard.writeText(doctor.user.email)}
+                >
+                  Copy Email
+                </Button>
+              </div>
+            </Card>
+          </div>
+
+
+        </div>
       </main>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Update</DialogTitle>
+          </DialogHeader>
+          <p className="py-2">
+            Are you sure you want to save these changes?
+          </p>
+          <DialogFooter className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave}>Confirm</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  )
+  );
 }

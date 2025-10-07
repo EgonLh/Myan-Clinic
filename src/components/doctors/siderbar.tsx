@@ -47,14 +47,16 @@ export function Sidebar() {
   return (
     <>
       {/* Mobile menu button */}
-      <Button
+      <div className="flex justify-end w-full">
+        <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 md:hidden"
+        className="fixed top-4 border me-4 z-50 bg-white/[0.4] md:hidden"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
+      </div>
 
       {/* Sidebar */}
       <div

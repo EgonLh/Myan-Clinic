@@ -1,4 +1,9 @@
+import { User } from "./user.type";
+
 export interface Patient {
+  condition: string;
+  gender: string;
+  age: string;
   id: number;
   name: string;
   username: string;
@@ -8,6 +13,7 @@ export interface Patient {
   dob: string; // date of birth
   createdAt: string;
   updatedAt: string;
+  user:User
 }
 
 export interface CreatePatientRequest {
@@ -16,7 +22,7 @@ export interface CreatePatientRequest {
   email: string;
   phone: string;
   address: string;
-  dob: string;
+  condition : string;
 }
 
 export interface UpdatePatientRequest extends Partial<CreatePatientRequest> {}

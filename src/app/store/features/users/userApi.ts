@@ -45,7 +45,7 @@ export const userApi = createApi({
     updateUser: builder.mutation<User, { id: number; body: UpdateUserRequest }>({
       query: ({ id, body }) => ({
         url: `/users/${id}`,
-        method: "PATCH",
+        method: "PUT",
         body,
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "User", id }],
