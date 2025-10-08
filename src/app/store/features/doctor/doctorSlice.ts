@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface DoctorState {
   id: number | null;
+  name: string|null;
   data: any | null;     
   loading: boolean;
   error: string | null;
@@ -9,6 +10,7 @@ interface DoctorState {
 
 const initialState: DoctorState = {
   id: null,
+  name:"",
   data: null,
   loading: false,
   error: null,

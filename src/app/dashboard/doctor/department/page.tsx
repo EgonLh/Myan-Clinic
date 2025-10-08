@@ -65,14 +65,14 @@ export default function DepartmentsPage() {
   const inactiveDoctors = totalStaff - activeDoctors;
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-background">
+    <div className="flex flex-col md:flex-row min-h-screen bg-background  flex justify-center">
       {/* Sidebar */}
       <div className="w-full md:w-64 flex-shrink-0">
         <Sidebar />
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-x-hidden">
+      <main className="flex-1 max-w-[80rem] p-4 sm:p-6 md:p-8 overflow-x-hidden">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
@@ -81,9 +81,7 @@ export default function DepartmentsPage() {
               Manage hospital departments and staff
             </p>
           </div>
-          <Button className="w-full md:w-fit flex items-center gap-2">
-            <Plus className="h-4 w-4" /> Add Department
-          </Button>
+          
         </div>
 
         {/* Stats Cards */}

@@ -18,6 +18,7 @@ export interface Appointment {
   meetingLink?: string;    // Optional Jitsi/meeting link
   createdAt: string;
   updatedAt: string;
+  duration : number
 }
 
 export interface CreateAppointmentRequest {
@@ -25,14 +26,16 @@ export interface CreateAppointmentRequest {
   doctorId: number
   date: string
   status?: "Pending" | "Confirmed" | "Completed" | "Cancelled"
+  duration ?: number
   notes?: string
-  invoice?: File
-  cost?: number
+  invoice?: string
+  costs?: number
+  description?:string
 }
 
 export interface UpdateAppointmentRequest {
   date?: string
-  status?: "Pending" | "Confirmed" | "Completed" | "Cancelled"
+  status?: "Pending" | "Confirmed" | "Completed" | "Cancelled" | "Not_Started"
   notes?: string
   invoice?: File
   cost?: number

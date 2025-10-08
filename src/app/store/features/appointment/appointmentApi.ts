@@ -18,9 +18,9 @@ export const appointmentApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "Appointment" as const, id })),
-              { type: "Appointment", id: "LIST" },
-            ]
+            ...result.map(({ id }) => ({ type: "Appointment" as const, id })),
+            { type: "Appointment", id: "LIST" },
+          ]
           : [{ type: "Appointment", id: "LIST" }],
     }),
 
@@ -34,9 +34,9 @@ export const appointmentApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "Appointment" as const, id })),
-              { type: "Appointment", id: "LIST" },
-            ]
+            ...result.map(({ id }) => ({ type: "Appointment" as const, id })),
+            { type: "Appointment", id: "LIST" },
+          ]
           : [{ type: "Appointment", id: "LIST" }],
     }),
     getAppointmentsByDoctor: builder.query<Appointment[], number>({
@@ -44,36 +44,54 @@ export const appointmentApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "Appointment" as const, id })),
-              { type: "Appointment", id: "LIST" },
-            ]
+            ...result.map(({ id }) => ({ type: "Appointment" as const, id })),
+            { type: "Appointment", id: "LIST" },
+          ]
           : [{ type: "Appointment", id: "LIST" }],
     }),
     createAppointment: builder.mutation<Appointment, CreateAppointmentRequest>({
-      query: (body) => {
-        const formData = new FormData();
-        Object.entries(body).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) formData.append(key, value as any);
-        });
-
-        return { url: "/appointments", method: "POST", body: formData };
-      },
+      query: (body) => ({
+        url: "/appointments",
+        method: "POST",
+        body, // plain JSON
+      }),
       invalidatesTags: [{ type: "Appointment", id: "LIST" }],
     }),
 
-    updateAppointment: builder.mutation<Appointment, { id: number; body: UpdateAppointmentRequest }>({
+    updateAppointment: builder.mutation<
+      Appointment,
+      { id: number; body: Partial<UpdateAppointmentRequest> }
+    >({
       query: ({ id, body }) => {
-        const formData = new FormData();
-        Object.entries(body).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) formData.append(key, value as any);
-        });
-        return { url: `/appointments/${id}`, method: "PATCH", body: formData };
+        if (!body) throw new Error("Body is required");
+
+        // Determine if any value is a File/Blob, then use FormData
+        const useFormData = Object.values(body).some(
+          (value) => value instanceof File || value instanceof Blob
+        );
+
+        if (useFormData) {
+          const formData = new FormData();
+          Object.entries(body).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) formData.append(key, value as any);
+          });
+          return { url: `/appointments/${id}`, method: "PATCH", body: formData };
+        } else {
+          // Simple JSON for normal updates
+          return {
+            url: `/appointments/${id}`,
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          };
+        }
       },
       invalidatesTags: (result, error, { id }) => [
         { type: "Appointment", id },
         { type: "Appointment", id: "LIST" },
       ],
     }),
+
 
     deleteAppointment: builder.mutation<{ success: boolean; id: number }, number>({
       query: (id) => ({ url: `/appointments/${id}`, method: "DELETE" }),

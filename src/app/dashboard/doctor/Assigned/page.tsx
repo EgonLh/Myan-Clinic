@@ -81,13 +81,13 @@ export default function DoctorAvailabilityPage() {
   );
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-background">
+    <div className="flex flex-col md:flex-row min-h-screen bg-background  flex justify-center">
       {/* Sidebar */}
       <div className="w-full md:w-64 flex-shrink-0">
         <Sidebar />
       </div>
 
-      <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-x-hidden">
+      <main className="flex-1 p-4 max-w-[80rem] sm:p-6 md:p-8 overflow-x-hidden">
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8">
           <div>
@@ -190,7 +190,7 @@ export default function DoctorAvailabilityPage() {
 
         {/* Dialog for Detailed Appointments */}
         <Dialog open={dialogOpen} onOpenChange={() => setDialogOpen(false)}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-[400px] max-h-[400px] overflow-scroll">
             <DialogHeader>
               <DialogTitle>Upcoming Appointments</DialogTitle>
               <DialogDescription>
