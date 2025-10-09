@@ -39,7 +39,7 @@ interface NavbarProps {
 const navigationItems = [
   { id: "overview", label: "Overview", icon: Home },
   { id: "appointments", label: "Appointments", icon: Calendar },
-  { id: "medications", label: "Medications", icon: Pill },
+  { id: "actions", label: "Action", icon: Pill },
   { id: "medicine-identifier", label: "Medicine ID", icon: Camera },
   { id: "records", label: "Records", icon: FileText },
   { id: "health-metrics", label: "Metrics", icon: Activity },

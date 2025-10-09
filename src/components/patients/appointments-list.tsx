@@ -1,11 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, MapPin, Video, Plus } from "lucide-react"
-import { useGetAppointmentsByPatientQuery, useCreateAppointmentMutation } from "@/app/store/features/appointment/appointmentApi"
+import { Calendar, Clock, MapPin, Video, Plus, FileUp } from "lucide-react"
+import {
+  useGetAppointmentsByPatientQuery,
+  useUploadInvoiceByAppointmentIdMutation,
+  useCreateAppointmentMutation,
+} from "@/app/store/features/appointment/appointmentApi"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 
@@ -16,22 +20,41 @@ interface AppointmentsListProps {
 export function AppointmentsList({ patientId }: AppointmentsListProps) {
   const { data: appointments, isLoading } = useGetAppointmentsByPatientQuery(patientId)
   const [createAppointment] = useCreateAppointmentMutation()
+  const [uploadInvoice] = useUploadInvoiceByAppointmentIdMutation()
 
-  const [openDialog, setOpenDialog] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [appointmentType, setAppointmentType] = useState<"Video call" | "In-person">("In-person")
   const [doctorName, setDoctorName] = useState("")
+  const [detailDialog, setDetailDialog] = useState<any | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+
+  // --- Filters ---
+  const [filterDoctor, setFilterDoctor] = useState("All")
+  const [filterStatus, setFilterStatus] = useState("All")
 
   if (isLoading) return <p>Loading appointments...</p>
   if (!appointments) return <p className="text-muted-foreground">No appointments found.</p>
 
+  // --- Sorted and Filtered Appointments ---
+  const sortedAppointments = useMemo(() => {
+    return [...appointments]
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .filter((a) =>
+        (filterDoctor === "All" || a.doctor?.user?.name === filterDoctor) &&
+        (filterStatus === "All" || a.status === filterStatus)
+      )
+  }, [appointments, filterDoctor, filterStatus])
+
+  const uniqueDoctors = Array.from(new Set(appointments.map(a => a.doctor?.user?.name).filter(Boolean)))
+  const uniqueStatuses = Array.from(new Set(appointments.map(a => a.status)))
+
+  // --- Create new appointment ---
   const handleCreateAppointment = async () => {
     if (!selectedDate || !doctorName) return alert("Please fill all fields")
-
     try {
       await createAppointment({
         patientId,
-        doctorId: 1, // Hardcoded for now; in real app, select from doctor list
+        doctorId: 1, // placeholder
         date: selectedDate.toISOString(),
         type: appointmentType,
         status: "pending",
@@ -46,9 +69,29 @@ export function AppointmentsList({ patientId }: AppointmentsListProps) {
     }
   }
 
+  // --- Upload invoice for selected appointment ---
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0])
+    }
+  }
+
+  const handleUploadInvoice = async () => {
+    if (!selectedFile || !detailDialog) return
+    try {
+      await uploadInvoice({ id: Number(detailDialog.id), file: selectedFile }).unwrap()
+      alert("Invoice uploaded successfully")
+      setSelectedFile(null)
+      setDetailDialog(null)
+    } catch (err) {
+      console.error(err)
+      alert("Failed to upload invoice")
+    }
+  }
+
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="rounded-sm shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5" />
@@ -57,16 +100,42 @@ export function AppointmentsList({ patientId }: AppointmentsListProps) {
           <CardDescription>Manage your upcoming medical appointments</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {appointments.map((appointment) => {
-              const isVideo = appointment.type?.toLowerCase() === "video call"
+          {/* --- Filters --- */}
+          <div className="flex flex-col md:flex-row gap-3 mb-4 text-sm">
+            <select
+              value={filterDoctor}
+              onChange={(e) => setFilterDoctor(e.target.value)}
+              className="border p-2 font-mono text-xs rounded"
+            >
+              <option value="All">All Doctors</option>
+              {uniqueDoctors.map((name) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="border p-2 font-mono  text-xs rounded"
+            >
+              <option value="All">All Status</option>
+              {uniqueStatuses.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            
+          </div>
+
+          {/* --- Appointment Cards --- */}
+          <div className="space-y-4 grid grid-cols-1 lg:grid-cols-2 gap-2">
+            {sortedAppointments.map((appointment) => {
               const appointmentDate = new Date(appointment.date).toLocaleDateString()
               const appointmentTime = new Date(appointment.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
 
               return (
-                <Card key={appointment.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <Card key={appointment.id} className=" transition-shadow shadow-none  rounded-sm">
+                  <CardContent className="">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold">{appointment.doctor?.user?.name ?? "Unknown Doctor"}</h3>
@@ -86,13 +155,11 @@ export function AppointmentsList({ patientId }: AppointmentsListProps) {
                           </div>
                         </div>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          {isVideo ? <Video className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
-                          {appointment.type === "Video call" ? "Virtual Appointment" : "In-person Appointment"}
+                          {appointment.notes}
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">Reschedule</Button>
-                        <Button size="sm">{isVideo ? "Join Call" : "View Details"}</Button>
+                        <Button size="sm" onClick={() => setDetailDialog(appointment)}>View Details</Button>
                       </div>
                     </div>
                   </CardContent>
@@ -101,58 +168,43 @@ export function AppointmentsList({ patientId }: AppointmentsListProps) {
             })}
           </div>
 
-          <div className="mt-6">
-            <Button className="w-full md:w-auto flex items-center gap-2" onClick={() => setOpenDialog(true)}>
-              <Plus className="w-4 h-4" />
-              Schedule New Appointment
-            </Button>
-          </div>
+
         </CardContent>
       </Card>
 
-      {/* Schedule Appointment Dialog */}
-      {openDialog && (
+
+
+      {/* --- Detail Dialog --- */}
+      {detailDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-background p-6 rounded-lg w-full max-w-md space-y-4">
-            <h2 className="text-xl font-semibold">Schedule New Appointment</h2>
+            <h2 className="text-lg font-semibold">Appointment Details</h2>
+            <p><strong>Doctor:</strong> {detailDialog.doctor?.user?.name}</p>
+            <p><strong>Date:</strong> {new Date(detailDialog.date).toLocaleString()}</p>
+            <p><strong>Status:</strong> {detailDialog.status}</p>
+            <p><strong>Type:</strong> {detailDialog.type}</p>
+            <p><strong>Cost:</strong> {detailDialog.costs ?? "N/A"} MMK</p>
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Doctor Name</label>
-              <input
-                type="text"
-                className="w-full border p-2 rounded"
-                value={doctorName}
-                onChange={(e) => setDoctorName(e.target.value)}
-                placeholder="Dr. Smith"
-              />
-            </div>
+            {!detailDialog.invoice && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium mb-1">Upload Invoice</label>
+                <input type="file" accept=".pdf,.png" onChange={handleFileChange} className="text-xs" />
+                <Button
+                  className="mt-2 flex items-center gap-1"
+                  onClick={handleUploadInvoice}
+                  disabled={!selectedFile}
+                >
+                  <FileUp className="w-4 h-4" /> Upload
+                </Button>
+              </div>
+            )}
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Select Date & Time</label>
-              <DatePicker
-                selected={selectedDate}
-                onChange={(date) => setSelectedDate(date)}
-                showTimeSelect
-                dateFormat="Pp"
-                className="w-full border p-2 rounded"
-              />
-            </div>
+            {detailDialog.invoice && (
+              <p className="text-sm text-green-600">Invoice already uploaded ✅</p>
+            )}
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Appointment Type</label>
-              <select
-                value={appointmentType}
-                onChange={(e) => setAppointmentType(e.target.value as any)}
-                className="w-full border p-2 rounded"
-              >
-                <option value="In-person">In-person</option>
-                <option value="Video call">Video call</option>
-              </select>
-            </div>
-
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setOpenDialog(false)}>Cancel</Button>
-              <Button onClick={handleCreateAppointment}>Schedule</Button>
+            <div className="flex justify-end mt-4">
+              <Button variant="outline" onClick={() => setDetailDialog(null)}>Close</Button>
             </div>
           </div>
         </div>

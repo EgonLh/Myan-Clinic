@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Calendar, Activity, Pill, FileText, ChevronRight, CheckCircle2, Clock1, AlarmClockPlus, Router, ChevronDown } from "lucide-react"
 import { Navbar } from "@/components/patients/navbar"
 import { HealthMetricsChart } from "@/components/patients/health-metrics-chart"
-import { JoinMeeting, RecentActivity } from "@/components/patients/joinMeeting"
+import { JoinMeeting } from "@/components/patients/joinMeeting"
 import { MedicationTracker } from "@/components/patients/medication-tracker"
 import { MedicineIdentifier } from "@/components/patients/medicine-identifier"
 import { AppointmentsList } from "@/components/patients/appointments-list"
@@ -19,6 +19,8 @@ import { MedicalRecords } from "@/components/patients/medical-record"
 import LoadingPills from "@/components/ui/loading"
 import { useRouter } from "next/navigation"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import CreateAppointment from "../doctor/create-appointment/page"
+import CreateAppointmentByPatient from "@/components/patients/create-appointments"
 
 export default function PatientDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
@@ -164,8 +166,8 @@ export default function PatientDashboard() {
                   </p>
                   <hr className="mt-1" />
 
-                  <div className="text-[10px] text-muted-foreground font-mono space-y-[2px]">
-                    <p>Appoints That Need To Confirm With Your Payment Invoices</p>
+                  <div className="text-[10px] text-muted-foreground text-justify font-mono space-y-[2px]">
+                    <p>Appoints Need To Confirm With Your Payment Invoices by uploading your payment. After comfirming , the appointment status will be changed</p>
                   </div>
                   <p className="text-[10px] text-slate-300 font-medium underline cursor-pointer hover:text-primary/80" onClick={() => setActiveTab("appointments")}>
                     View details
@@ -220,6 +222,8 @@ export default function PatientDashboard() {
 
           </div>
         )
+      case "actions":
+        return <CreateAppointmentByPatient/>
       case "appointments":
         return <AppointmentsList patientId={patientId} />
       case "medicine-identifier":

@@ -136,7 +136,7 @@ export default function CreateAppointment() {
             patientId: Number(form.patient),
             doctorId: Number(form.doctor),
             date: isoDate.toISOString(),
-            status: "Pending",
+            status: "not_started", 
             duration: Number(form.duration),
             notes: `Assigned By ${doctorData.name} -` + form.notes,
             costs: totalCost,

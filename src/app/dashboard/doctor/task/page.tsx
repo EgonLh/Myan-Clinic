@@ -311,7 +311,7 @@ export default function TasksPage() {
                     {selectedEvent.costs && (
                       <>
                         <p className="text-gray-600">Cost:</p>
-                        <p className="font-semibold text-gray-900">${selectedEvent.costs}</p>
+                        <p className="font-semibold text-gray-900">{selectedEvent.costs} MMK</p>
                       </>
                     )}
                   </CardContent>

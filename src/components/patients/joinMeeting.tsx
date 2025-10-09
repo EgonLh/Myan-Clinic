@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar } from "lucide-react"
 import {
   useGetAppointmentsByPatientQuery,
+  useUpdateAppointmentMutation,
   useUploadInvoiceByAppointmentIdMutation,
 } from "@/app/store/features/appointment/appointmentApi"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { AppointmentQRCode } from "./appointmetnQr"
 
 interface JoinNowProps {
   patientId: number | undefined
@@ -16,6 +18,7 @@ interface JoinNowProps {
 
 export function JoinMeeting({ patientId }: JoinNowProps) {
   const { data: appointments, isLoading } = useGetAppointmentsByPatientQuery(Number(patientId))
+  const  [updateStatus] = useUpdateAppointmentMutation();
   const [uploadInvoice] = useUploadInvoiceByAppointmentIdMutation();
   const [file, setFile] = useState<File | null>(null)
   const router = useRouter()
@@ -43,11 +46,14 @@ export function JoinMeeting({ patientId }: JoinNowProps) {
       setFile(e.target.files[0])
     }
   }
-
+const pendingObj = {
+      status: "Pending" as "Pending"
+    }
   const handleUpload = async () => {
     if (!file) return;
     try {
       await uploadInvoice({ id: Number(nextAppointment.id), file }).unwrap();
+      await updateStatus({ id: Number(nextAppointment.id),body:pendingObj})
       alert("Invoice uploaded successfully");
     } catch (err) {
       console.error(err);
@@ -63,6 +69,10 @@ export function JoinMeeting({ patientId }: JoinNowProps) {
           <Calendar className="w-4 h-4" />
           Appointment Invoice
         </CardTitle>
+        <div className="flex justify-between my-2 text-xs border-slate-200 pb-1">
+          <span className="text-muted-foreground">Payment:</span>
+          <span>Paid via KBZ Pay (Ref: #INV-10234)</span>
+        </div>
       </CardHeader>
 
       <CardContent className="p-0 space-y-2 border-t-3 border-dashed text-sm">
@@ -71,8 +81,12 @@ export function JoinMeeting({ patientId }: JoinNowProps) {
           <span>Dr. {nextAppointment.doctor?.user?.name}</span>
         </div>
         <div className="flex justify-between my-2 text-xs border-slate-200 pb-1">
-          <span className="text-muted-foreground">Department:</span>
-          <span>{nextAppointment.doctor?.department?.name}</span>
+          <span className="text-muted-foreground">Patient:</span>
+          <span>{nextAppointment.patient?.user?.name}</span>
+        </div>
+        <div className="flex justify-between my-2 text-xs border-slate-200 pb-1">
+          <span className="text-muted-foreground">Duration:</span>
+          <span>{nextAppointment.duration} hr</span>
         </div>
         <div className="flex justify-between my-2 text-xs border-slate-200 pb-1">
           <span className="text-muted-foreground">Scheduled At:</span>
@@ -82,20 +96,39 @@ export function JoinMeeting({ patientId }: JoinNowProps) {
           <span className="text-muted-foreground">Status:</span>
           <span>{nextAppointment.status}</span>
         </div>
+        <div className="flex justify-between my-2 text-xs border-slate-200 pb-1">
+          <span className="text-muted-foreground">Notes:</span>
+          <span>{nextAppointment?.notes}</span>
+        </div>
+        <div className="flex justify-between my-2 text-xs border-slate-200 pb-1">
+          <span className="text-muted-foreground">Description:</span>
+          <span> {nextAppointment?.description}</span>
+        </div>
 
+        <div className="flex justify-between my-2 text-xs border-slate-200 pb-1">
+          <span className="text-muted-foreground">Total Cost:</span>
+          <span>{nextAppointment.costs} MMK</span>
+        </div>
+        <div className="flex justify-between my-2 text-xs border-slate-200 pb-1">
+          <span className="text-muted-foreground">Payment Status:</span>
+          {(nextAppointment.status).toLocaleLowerCase() != "not_started" ? <span className="text-green-600">Completed</span> : <span className="text-green-600">-</span>}
+        </div>
         {/* Conditionally show Join button only if invoice exists */}
         {nextAppointment.invoice ? (
           // Invoice exists
-          nextAppointment.status.toLowerCase() === "confirmed" && (
+          nextAppointment.status.toLowerCase() === "confirmed" && (<div>
             <Button
               as="a"
               onClick={handleMeeting}
               target="_blank"
               variant="outline"
-              className="w-full mt-3 font-mono"
+              className="w-full mt-3 font-mono shadow-none"
             >
               Join Appointment
             </Button>
+            <AppointmentQRCode appointment={nextAppointment} />
+          </div>
+
           )
         ) : (
           // No invoice yet
