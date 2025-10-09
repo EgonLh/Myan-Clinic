@@ -57,6 +57,26 @@ export const appointmentApi = createApi({
       }),
       invalidatesTags: [{ type: "Appointment", id: "LIST" }],
     }),
+    uploadInvoiceByAppointmentId: builder.mutation<
+      Appointment,
+      { id: number; file: File }
+    >({
+      query: ({ id, file }) => {
+        const formData = new FormData();
+        formData.append("invoice", file); // matches FileInterceptor('invoice')
+
+        return {
+          url: `/appointments/${id}/upload-invoice`, // matches your @Patch route
+          method: "PATCH",
+          body: formData,
+          // Note: do NOT set Content-Type here. The browser sets it automatically for FormData
+        };
+      },
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Appointment", id },
+        { type: "Appointment", id: "LIST" },
+      ],
+    }),
 
     updateAppointment: builder.mutation<
       Appointment,
@@ -111,4 +131,5 @@ export const {
   useCreateAppointmentMutation,
   useUpdateAppointmentMutation,
   useDeleteAppointmentMutation,
+  useUploadInvoiceByAppointmentIdMutation
 } = appointmentApi;

@@ -20,34 +20,37 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Users } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Search } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/store/store";
 import {
   useGetAppointmentsQuery,
-  useGetAppointmentsByDoctorQuery,
 } from "@/app/store/features/appointment/appointmentApi";
 import { useGetDoctorsQuery } from "@/app/store/features/doctor/doctorApi";
 
 export default function DoctorAvailabilityPage() {
-  const [generalistView, setGeneralistView] = useState(false);
   const [doctorSearch, setDoctorSearch] = useState("");
   const [selectedDoctorAppointments, setSelectedDoctorAppointments] = useState<any[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [departmentFilter, setDepartmentFilter] = useState("");
 
   const { data: doctors = [], isLoading: doctorsLoading } = useGetDoctorsQuery();
   const doctorData = useSelector((state: RootState) => state.doctor?.data);
-  const doctorId = doctorData?.id || "";
 
-  // Fetch appointments based on generalist or assigned view
   const {
     data: appointments = [],
     isLoading: appointmentsLoading,
     isError,
-  } = generalistView
-      ? useGetAppointmentsQuery()
-      : useGetAppointmentsByDoctorQuery(doctorId, { skip: !doctorId });
+  } = useGetAppointmentsQuery();
 
   if (doctorsLoading || appointmentsLoading)
     return (
@@ -75,13 +78,25 @@ export default function DoctorAvailabilityPage() {
     return `${startDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${endDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
   };
 
-  // Filter doctors by search input
-  const filteredDoctors = doctors.filter((doctor) =>
-    doctor.user.name.toLowerCase().includes(doctorSearch.toLowerCase())
+  // Extract unique departments
+  const departments = Array.from(
+    new Set(doctors.map((d) => d.department?.name).filter(Boolean))
   );
 
+  // Filter doctors by search and department
+  const filteredDoctors = doctors.filter((doctor) => {
+    const matchesSearch = doctor.user.name
+      .toLowerCase()
+      .includes(doctorSearch.toLowerCase());
+    const matchesDepartment =
+      departmentFilter === "all" || !departmentFilter
+        ? true
+        : doctor.department?.name === departmentFilter;
+    return matchesSearch && matchesDepartment;
+  });
+
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-background  flex justify-center">
+    <div className="flex flex-col md:flex-row min-h-screen bg-background justify-center">
       {/* Sidebar */}
       <div className="w-full md:w-64 flex-shrink-0">
         <Sidebar />
@@ -98,60 +113,60 @@ export default function DoctorAvailabilityPage() {
               Track doctors' appointments and their statuses
             </p>
           </div>
-          {doctorData?.type === "Generalist" && (
-            <Button
-              className="w-full md:w-fit text-sm md:text-base flex items-center justify-center gap-2"
-              onClick={() => setGeneralistView((prev) => !prev)}
-            >
-              <Users className="h-4 w-4" />
-              {generalistView ? "Assigned View" : "Diagnosis View"}
-            </Button>
-          )}
+
+
         </div>
 
-        {/* Doctor Search */}
-        <div className="mb-4 w-full md:w-1/2">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search doctors by name..."
-              className="pl-10 w-full"
-              value={doctorSearch}
-              onChange={(e) => setDoctorSearch(e.target.value)}
-            />
-          </div>
-        </div>
 
         {/* Doctor Table */}
-        <Card>
+        <Card className="shadow-none ">
           <CardHeader>
             <CardTitle>Doctor Schedule</CardTitle>
             <CardDescription>View and manage doctor appointments</CardDescription>
+            <div className="flex my-4 relative justify-between w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search doctors by name..."
+                className="pl-10 w-full border shadow-none me-2"
+                value={doctorSearch}
+                onChange={(e) => setDoctorSearch(e.target.value)}
+              />
+              <Select onValueChange={(value) => setDepartmentFilter(value)} value={departmentFilter}>
+                <SelectTrigger className="w-[200px] font-mono text-xs shadow-none">
+                  <SelectValue placeholder="Filter by Department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Departments</SelectItem>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept} value={dept}>
+                      {dept}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="rounded-md border overflow-x-auto">
-              <Table className="min-w-[900px]">
+            <div className="rounded-md bg-slate-200/[0.1] overflow-x-auto">
+              <Table className="min-w-[900px] p-1">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Doctor Name</TableHead>
-                    <TableHead>License</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Time</TableHead>
+                    <TableHead className="font-mono">Doctor Name</TableHead>
+                    <TableHead className="font-mono">License</TableHead>
+                    <TableHead className="font-mono">Department</TableHead>
+                    <TableHead className="font-mono">Status</TableHead>
+                    <TableHead className="font-mono">Date</TableHead>
+                    <TableHead className="font-mono">Time</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredDoctors.map((doctor) => {
-                    // Get upcoming appointments for this doctor
                     const doctorAppointments = appointments
                       .filter((appt) => appt.doctorId === doctor.id)
                       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-                    // Pick the next appointment as an example
                     const nextAppt = doctorAppointments[0];
-
                     const apptDate = nextAppt ? new Date(nextAppt.date).toLocaleDateString() : "-";
                     const apptTime = nextAppt
                       ? `${new Date(nextAppt.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${new Date(new Date(nextAppt.date).getTime() + nextAppt.duration * 60 * 60 * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
@@ -183,16 +198,15 @@ export default function DoctorAvailabilityPage() {
                   })}
                 </TableBody>
               </Table>
-
             </div>
           </CardContent>
         </Card>
 
         {/* Dialog for Detailed Appointments */}
         <Dialog open={dialogOpen} onOpenChange={() => setDialogOpen(false)}>
-          <DialogContent className="max-w-[400px] max-h-[400px] overflow-scroll">
+          <DialogContent className="max-w-[400px] max-h-3/4 overflow-scroll">
             <DialogHeader>
-              <DialogTitle>Upcoming Appointments</DialogTitle>
+              <DialogTitle>Total Appointments [ {selectedDoctorAppointments.length} ]</DialogTitle>
               <DialogDescription>
                 List of all appointments for this doctor with start and end times.
               </DialogDescription>
@@ -200,20 +214,20 @@ export default function DoctorAvailabilityPage() {
             <div className="space-y-3 mt-4 text-sm">
               {selectedDoctorAppointments.length > 0 ? (
                 selectedDoctorAppointments.map((appt) => (
-                  <div key={appt.id} className="border-b pb-2">
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Patient:</span>
+                  <div key={appt.id} className="border-b-2 hover:border hover:border-solid border-dashed hover:p-2 transition-all duration-300s hover:rounded pb-2">
+                    <div className="flex justify-between ">
+                      <span className="font-semibold font-mono text-xs my-1">Patient:</span>
                       <span>{appt.patient?.user?.name || "N/A"}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between font-mono text-xs my-1">
                       <span className="font-semibold">Date:</span>
-                      <span>{new Date(appt.date).toLocaleDateString()}</span>
+                      <span className="text-muted-foreground">{new Date(appt.date).toLocaleDateString()}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between font-mono text-xs my-1">
                       <span className="font-semibold">Time:</span>
                       <span>{formatTimeRange(appt.date, appt.duration)}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between font-mono text-xs my-1">
                       <span className="font-semibold">Status:</span>
                       <Badge
                         variant={
@@ -232,7 +246,6 @@ export default function DoctorAvailabilityPage() {
               ) : (
                 <p>No upcoming appointments.</p>
               )}
-
             </div>
             <DialogFooter className="mt-4">
               <Button onClick={() => setDialogOpen(false)}>Close</Button>

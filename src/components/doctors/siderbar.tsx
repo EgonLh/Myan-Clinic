@@ -41,7 +41,6 @@ export function Sidebar() {
   const handleLogout = () => {
     dispatch(clearDoctor());
     redirect('/')
-
   }
 
   const goToInfo = () => {
@@ -120,10 +119,10 @@ export function Sidebar() {
               <DropdownMenuItem>
                 <p className="text-center text-lg w-full underline ">Command /-</p>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout} className="hover:border text-center py-2 m-1 ">
+              <DropdownMenuItem onClick={()=>handleLogout()} className="hover:border text-center py-2 m-1 ">
                 <p className="w-full text-center  text-slate-500 hover:text-slate-700">Logout</p>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={goToInfo} className="hover:border text-center py-2 m-1 ">
+              <DropdownMenuItem onClick={()=>goToInfo()} className="hover:border text-center py-2 m-1 ">
                 <p className="w-full text-center  text-slate-500 hover:text-slate-700">User Info</p>
               </DropdownMenuItem>
             </DropdownMenuContent>

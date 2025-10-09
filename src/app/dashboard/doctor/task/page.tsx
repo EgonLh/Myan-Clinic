@@ -19,6 +19,7 @@ import { Calendar as BigCalendar, momentLocalizer, Event } from "react-big-calen
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { useRouter } from "next/navigation";
+import LoadingPills from "@/components/ui/loading";
 
 const localizer = momentLocalizer(moment);
 
@@ -70,8 +71,8 @@ export default function TasksPage() {
     costs: appt.costs,
   }));
 
-  if (isLoading) return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  if (isError) return <div className="flex items-center justify-center h-screen text-red-500">Failed to load appointments.</div>;
+  if (isLoading) return <div className="flex items-center justify-center h-screen"><LoadingPills message="Data is Loading .."/></div>;
+  if (isError) return <div className="flex items-center justify-center h-screen text-red-500"><LoadingPills message="Data is Fetching .."/></div>;
 
   return (
     <>
@@ -253,7 +254,7 @@ export default function TasksPage() {
 
               {/* Selected Appointment Detail */}
               {selectedEvent && (
-                <Card className="border shadow-none rounded-sm border-gray-300  bg-white font-mono">
+                <Card className="border order-0 shadow-none rounded-sm border-gray-300  bg-white font-mono">
                   <CardHeader className="border-b pb-2">
                     <CardTitle className="text-sm font-semibold text-center tracking-wide uppercase">
                       #Appointment Detail

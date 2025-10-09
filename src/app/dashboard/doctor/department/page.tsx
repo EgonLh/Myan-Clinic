@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Plus, Building2, Users, UserCheck, Activity } from "lucide-react";
+import { Search,  Building2, Users, UserCheck, Activity } from "lucide-react";
 import { useGetDepartmentsQuery } from "@/app/store/features/department/departmentApi";
 import { useState } from "react";
 import {
@@ -31,6 +31,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import LoadingPills from "@/components/ui/loading";
 
 export default function DepartmentsPage() {
   const { data: departments = [], isLoading, isError } = useGetDepartmentsQuery();
@@ -40,14 +41,14 @@ export default function DepartmentsPage() {
   if (isLoading)
     return (
       <div className="flex items-center justify-center h-screen">
-        <p>Loading departments...</p>
+        <LoadingPills message="Data is Loading .."/>
       </div>
     );
 
   if (isError)
     return (
       <div className="flex items-center justify-center h-screen text-red-500">
-        <p>Failed to load departments.</p>
+        <LoadingPills message="Data is Fetching .."/>
       </div>
     );
 

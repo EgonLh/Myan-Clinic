@@ -45,10 +45,12 @@ export default function AppointmentsPage() {
   const doctorData = useSelector((state: RootState) => state.doctor?.data);
   const doctorId = doctorData?.id || "";
   const handleConfirmed = (app_id: any) => {
+    console.log("work")
     const confirmObj = {
       status: "Confirmed" as "Confirmed"
     }
     updateAppointment({ id: Number(app_id), body: confirmObj });
+    setSelectedAppointment(null)
   }
   // Loading doctor data
   if (!doctorId || !doctorData) {
@@ -294,6 +296,10 @@ export default function AppointmentsPage() {
                   <div className="flex justify-between border-b pb-1">
                     <span className="font-semibold">Type / Link:</span>
                     <span>{selectedAppointment.type || selectedAppointment.meetingLink || "N/A"}</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-1">
+                    <span className="font-semibold">Invoice:</span>
+                    <span>{selectedAppointment?.invoice || "empty"}</span>
                   </div>
                   <div className="flex justify-between border-b pb-1">
                     <span className="font-semibold">Status:</span>

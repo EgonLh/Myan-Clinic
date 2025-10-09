@@ -26,8 +26,10 @@ import {
   HelpCircle,
   Camera,
   LogOut,
+  BriefcaseMedical,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { DialogTitle } from "@radix-ui/react-dialog"
 
 interface NavbarProps {
   activeTab: string
@@ -47,18 +49,18 @@ export function Navbar({ activeTab, onTabChange }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-4">
+    <header className="sticky flex justify-center top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container  flex h-24 items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <Heart className="w-4 h-4 text-primary-foreground" />
+          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
+            <BriefcaseMedical className="w-4 h-4 text-primary-foreground" />
           </div>
-          <h1 className="text-lg font-semibold hidden sm:block">HealthCare Portal</h1>
+          <h1 className="text-lg font-semibold hidden sm:block font-mono tracking-wide">MyanClinic</h1>
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1">
+        <nav className="hidden  md:flex items-center space-x-1 ">
           {navigationItems.map((item) => {
             const Icon = item.icon
             return (
@@ -69,7 +71,7 @@ export function Navbar({ activeTab, onTabChange }: NavbarProps) {
                 onClick={() => onTabChange(item.id)}
               >
                 <Icon className="w-4 h-4" />
-                <span className="hidden lg:inline">{item.label}</span>
+                <span className="hidden xl:inline font-mono">{item.label}</span>
               </Button>
             )
           })}
@@ -128,6 +130,7 @@ export function Navbar({ activeTab, onTabChange }: NavbarProps) {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-80">
+              <DialogTitle>Mobile Navigation</DialogTitle>
               <div className="flex flex-col space-y-4 mt-4">
                 <div className="flex items-center gap-3 pb-4 border-b">
                   <Avatar className="h-10 w-10">

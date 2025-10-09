@@ -88,7 +88,6 @@ export default function SettingsPage() {
       setDialogOpen(false);
       toast.success("Profile updated successfully!");
     } catch (error) {
-      console.error("Update failed:", error);
       toast.error("Failed to update profile.");
     }
   };
