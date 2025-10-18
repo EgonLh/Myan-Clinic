@@ -1,105 +1,148 @@
 "use client"
 
+import * as React from "react"
 import {
-  useGetAppointmentsPerDoctorQuery,
   useGetDoctorsByDepartmentQuery,
-  useGetPatientsGrowthQuery,
+  useGetAppointmentsPerDoctorQuery,
 } from "@/app/store/features/analysis/analysisApi"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-
 import {
-  AreaChart,
-  BarChart,
-  LineChart,
   ResponsiveContainer,
+  CartesianGrid,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Area,
+  Tooltip,
+  BarChart,
   Bar,
-  Line,
 } from "recharts"
 
 export function ChartsGrid() {
-  const { data: patientsGrowth, isLoading: loadingPatients } = useGetPatientsGrowthQuery()
   const { data: doctorsByDept, isLoading: loadingDoctors } = useGetDoctorsByDepartmentQuery()
-  const { data: appointmentsPerDoctor, isLoading: loadingAppointments } = useGetAppointmentsPerDoctorQuery()
+  const { data: appointmentsPerDoctor, isLoading: loadingAppointments } =
+    useGetAppointmentsPerDoctorQuery()
 
-  if (loadingPatients || loadingDoctors || loadingAppointments) return <p>Loading charts...</p>
+  if (loadingDoctors || loadingAppointments) {
+    return (
+      <div className="flex justify-center items-center h-[200px] text-muted-foreground font-mono">
+        Loading charts...
+      </div>
+    )
+  }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Patients Growth */}
-      <Card className="bg-card border-border">
+    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 font-mono">
+      {/* 🩺 Doctors by Department — Vertical Bar Chart */}
+      <Card className="bg-card border-dotted border-border shadow-none transition-all">
         <CardHeader>
-          <CardTitle>Patients Growth</CardTitle>
-          <CardDescription>Monthly new patient registrations.</CardDescription>
+          <CardTitle className="text-base sm:text-lg md:text-xl">
+            Doctors by Department
+          </CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
+            Visual count of doctors across departments.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <ChartContainer
-            className="h-[300px]"
-            config={{ count: { label: "Patients", color: "hsl(var(--chart-1))" } }}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={patientsGrowth}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
-                <YAxis stroke="hsl(var(--muted-foreground))" />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Line type="monotone" dataKey="count" stroke="var(--color-users)" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartContainer>
+        <CardContent className="w-full">
+          {doctorsByDept && doctorsByDept.length > 0 ? (
+            <ChartContainer
+              className="h-[250px] sm:h-[300px] md:h-[360px] w-full"
+              config={{
+                count: { label: "Doctors", color: "hsl(var(--chart-1))" },
+              }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={doctorsByDept}
+                  margin={{ top: 10, right: 20, left: 10, bottom: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" />
+                  <XAxis
+                    dataKey="department"
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fontSize: 6 }}
+                    interval={0}
+                    angle={0}
+                    textAnchor="middle"
+                  />
+                  <YAxis
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fontSize: 10 }}
+                    width={30}
+                  />
+                  <Tooltip content={<ChartTooltipContent />} />
+                  <Bar
+                    dataKey="count"
+                    fill="hsl(var(--chart-1))"
+                    radius={[4, 4, 0, 0]}
+                    barSize={70}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          ) : (
+            <p className="text-center text-muted-foreground text-sm">
+              No department data available.
+            </p>
+          )}
         </CardContent>
       </Card>
 
-      {/* Doctors by Department */}
-      <Card className="bg-card border-border">
+      {/* 📊 Appointments per Doctor — Horizontal Bar Chart */}
+      <Card className="bg-card border-dotted border-border shadow-none transition-all">
         <CardHeader>
-          <CardTitle>Doctors by Department</CardTitle>
-          <CardDescription>Number of doctors in each department.</CardDescription>
+          <CardTitle className="text-base sm:text-lg md:text-xl">
+            Appointments per Doctor
+          </CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
+            Appointment volume comparison across doctors.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <ChartContainer
-            className="h-[300px]"
-            config={{ count: { label: "Doctors", color: "hsl(var(--chart-2))" } }}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={doctorsByDept} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis type="number" stroke="hsl(var(--muted-foreground))" />
-                <YAxis dataKey="department" type="category" stroke="hsl(var(--muted-foreground))" />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="count" fill="var(--color-users)" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-
-      {/* Appointments per Doctor */}
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle>Appointments per Doctor</CardTitle>
-          <CardDescription>Number of appointments handled by each doctor.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer
-            className="h-[300px]"
-            config={{ appointmentsCount: { label: "Appointments", color: "hsl(var(--chart-3))" } }}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={appointmentsPerDoctor}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="doctorName" stroke="hsl(var(--muted-foreground))" />
-                <YAxis stroke="hsl(var(--muted-foreground))" />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="appointmentsCount" fill="var(--color-revenue)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
+        <CardContent className="w-full">
+          {appointmentsPerDoctor && appointmentsPerDoctor.length > 0 ? (
+            <ChartContainer
+              className="h-[250px] sm:h-[300px] md:h-[360px] w-full"
+              config={{
+                appointmentsCount: {
+                  label: "Appointments",
+                  color: "hsl(var(--chart-4))",
+                },
+              }}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={appointmentsPerDoctor}
+                  layout="vertical"
+                  margin={{ top: 10, right: 20, left: 30, bottom: 10 }}
+                >
+                  <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" />
+                  <XAxis
+                    type="number"
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fontSize: 10 }}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="doctorName"
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fontSize: 10 }}
+                    width={100}
+                  />
+                  <Tooltip content={<ChartTooltipContent />} />
+                  <Bar
+                    dataKey="appointmentsCount"
+                    fill="hsl(var(--chart-4))"
+                    radius={[4, 4, 4, 4]}
+                    barSize={50}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          ) : (
+            <p className="text-center text-muted-foreground text-sm">
+              No appointment data available.
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

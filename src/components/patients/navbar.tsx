@@ -42,7 +42,7 @@ const navigationItems = [
   { id: "actions", label: "Action", icon: Pill },
   { id: "medicine-identifier", label: "Medicine ID", icon: Camera },
   { id: "records", label: "Records", icon: FileText },
-  { id: "health-metrics", label: "Metrics", icon: Activity },
+  { id: "storage", label: "Storage", icon: Activity },
 ]
 
 export function Navbar({ activeTab, onTabChange }: NavbarProps) {

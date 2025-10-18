@@ -18,248 +18,228 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog"
-import { z } from "zod"
-import { toast } from "sonner"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
+import LoadingPills from "@/components/ui/loading"
 
-import {
-  useUpdateAppointmentMutation,
-  useDeleteAppointmentMutation,
-} from "@/app/store/features/appointment/appointmentApi"
-
-export const appointmentSchema = z.object({
-  id: z.number(),
-  patientName: z.string(),
-  doctorName: z.string(),
-  doctorDepartment: z.string(),
-  date: z.string(),
-  status: z.string(),
-  notes: z.string().nullable(),
-})
-
-const columns: ColumnDef<z.infer<typeof appointmentSchema>>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-  },
-  { accessorKey: "patientName", header: "Patient" },
-  { accessorKey: "doctorName", header: "Doctor" },
-  { accessorKey: "doctorDepartment", header: "Department" },
-  { accessorKey: "date", header: "Date" },
-  { accessorKey: "status", header: "Status" },
-  {
-    accessorKey: "notes",
-    header: "Notes",
-    cell: ({ row }) => (
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="link" size="sm">
-            View
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Appointment Notes</DialogTitle>
-          </DialogHeader>
-          <div className="mt-2">
-            {row.original.notes ? row.original.notes : "No notes available."}
-          </div>
-          <div className="mt-4 flex justify-end">
-            <DialogClose asChild>
-              <Button>Close</Button>
-            </DialogClose>
-          </div>
-        </DialogContent>
-      </Dialog>
-    ),
-  },
-]
-
-export default function AppointmentTable() {
+export default function AppointmentPage() {
   const { data: appointmentsData, isLoading } = useGetAppointmentsQuery()
   const { data: doctorsData } = useGetDoctorsQuery()
 
   const [filters, setFilters] = React.useState({
     patientName: "",
     doctorName: "",
+    doctorType: "",
     status: "",
     departmentId: "",
+    date: "",
   })
 
-  const [updateAppointment] = useUpdateAppointmentMutation()
-  const [deleteAppointment] = useDeleteAppointmentMutation()
-
+  // Department mapping
   const departmentMap = React.useMemo(() => {
-    const map: Record<number, string> = {};
-    (doctorsData ?? []).forEach((doc) => {
-      if (doc.department && typeof doc.department === "object") {
-        map[doc.department.id] = doc.department.name;
-      }
-    });
-    return map;
+    const map: Record<number, string> = {}
+    doctorsData?.forEach((doc) => {
+      if (doc.department) map[doc.department.id] = doc.department.name
+    })
+    return map
   }, [doctorsData])
 
+  // Table data with filters
   const tableData = React.useMemo(() => {
     let data = (appointmentsData ?? []).map((appt) => ({
       id: appt.id,
       patientName: appt.patient?.user?.name ?? "Unknown",
       doctorName: appt.doctor?.user?.name ?? "Unknown",
-      doctorDepartment: appt.doctor?.departmentId ?? "Unknown",
+      doctorDepartment: departmentMap[appt.doctor?.departmentId] ?? "Unknown",
+      doctorType: appt.doctor?.type ?? "Unknown",
       date: new Date(appt.date).toLocaleString(),
       status: appt.status,
       notes: appt.notes,
     }))
 
     if (filters.patientName)
-      data = data.filter((d) => d.patientName.toLowerCase().includes(filters.patientName.toLowerCase()))
+      data = data.filter(d => d.patientName.toLowerCase().includes(filters.patientName.toLowerCase()))
     if (filters.doctorName)
-      data = data.filter((d) => d.doctorName.toLowerCase().includes(filters.doctorName.toLowerCase()))
+      data = data.filter(d => d.doctorName.toLowerCase().includes(filters.doctorName.toLowerCase()))
+    if (filters.doctorType)
+      data = data.filter(d => d.doctorType.toLowerCase() === filters.doctorType.toLowerCase())
     if (filters.status)
-      data = data.filter((d) => d.status === filters.status)
+      data = data.filter(d => d.status.toLowerCase() === filters.status.toLowerCase())
     if (filters.departmentId)
-      data = data.filter((d) => String(d.doctorDepartment) === filters.departmentId)
+      data = data.filter(
+        d => String(Object.keys(departmentMap).find(key => departmentMap[Number(key)] === d.doctorDepartment)) === filters.departmentId
+      )
+    if (filters.date) {
+      const selectedDate = new Date(filters.date).toDateString()
+      data = data.filter(d => new Date(d.date).toDateString() === selectedDate)
+    }
 
     return data
   }, [appointmentsData, filters, departmentMap])
 
+  // Table state
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
-  const allColumns = React.useMemo(() => {
-    return [
-      ...columns,
-      {
-        id: "actions",
-        header: "Actions",
-        cell: ({ row }: any) => (
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={async () => {
-                try {
-                  await updateAppointment({ id: row.original.id, body: { status: "Done" } }).unwrap()
-                  toast.success("Appointment updated to Done")
-                } catch {
-                  toast.error("Failed to update appointment")
-                }
-              }}
-            >
-              Done
+  const columns: ColumnDef<any>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          indeterminate={table.getIsSomePageRowsSelected() ? true : undefined}
+          onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          indeterminate={row.getIsSomeSelected() ? true : undefined}
+          onCheckedChange={value => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+    },
+    {
+      accessorKey: "patientName",
+      header: "Patient",
+      cell: ({ row }) => (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="link" size="sm" className="text-left font-mono">
+              {row.original.patientName}
             </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md rounded-lg p-4 bg-gray-50 font-mono">
+            <DialogHeader>
+              <DialogTitle>Appointment Details</DialogTitle>
+            </DialogHeader>
+            <div className="mt-2 text-sm font-mono grid grid-cols-2 gap-y-1 gap-x-4">
+              <div className="font-semibold">Patient:</div>
+              <div>{row.original.patientName}</div>
 
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={async () => {
-                if (!confirm("Are you sure you want to delete this appointment?")) return
-                try {
-                  await deleteAppointment(row.original.id).unwrap()
-                  toast.success("Appointment deleted")
-                } catch {
-                  toast.error("Failed to delete appointment")
-                }
-              }}
-            >
-              Delete
-            </Button>
-          </div>
-        ),
-      },
-    ]
-  }, [updateAppointment, deleteAppointment])
+              <div className="font-semibold">Doctor:</div>
+              <div>{row.original.doctorName}</div>
+
+              <div className="font-semibold">Department:</div>
+              <div>{row.original.doctorDepartment}</div>
+
+              <div className="font-semibold">Doctor Type:</div>
+              <div>{row.original.doctorType}</div>
+
+              <div className="font-semibold">Date:</div>
+              <div>{row.original.date}</div>
+
+              <div className="font-semibold">Status:</div>
+              <div>{row.original.status}</div>
+
+              <div className="font-semibold">Notes:</div>
+              <div>{row.original.notes || "-"}</div>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <DialogClose asChild>
+                <Button size="sm" variant="outline">Close</Button>
+              </DialogClose>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+      ),
+    },
+    { accessorKey: "doctorName", header: "Doctor" },
+    { accessorKey: "doctorDepartment", header: "Department" },
+    { accessorKey: "doctorType", header: "Doctor Type" },
+    { accessorKey: "date", header: "Date" },
+    { accessorKey: "status", header: "Status" },
+    {
+      accessorKey: "notes", header: "Notes", cell: ({ row }) => (
+        <span className="font-mono text-xs">{row.original.notes || "-"}</span>
+      )
+    },
+  ]
 
   const table = useReactTable({
     data: tableData,
-    columns: allColumns,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
+    columns,
+    state: { sorting, columnFilters, columnVisibility, rowSelection },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getRowId: (row) => row.id.toString(),
+    getRowId: row => row.id.toString(),
   })
 
-  if (isLoading) return <div>Loading appointments...</div>
+  if (isLoading) return <LoadingPills message="Loading Appointments..." />
 
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 items-end">
-        <div className="flex-1">
-          <label className="block text-sm font-medium">Patient Name</label>
+      <div className="flex flex-col w-full border-dashed border p-4 rounded gap-5 shadow-none bg-white font-mono">
+        <div className="grid md:grid-cols-3 grid-cols-2 gap-4">
           <Input
             placeholder="Filter by patient"
             value={filters.patientName}
-            onChange={(e) => setFilters({ ...filters, patientName: e.target.value })}
+            onChange={e => setFilters({ ...filters, patientName: e.target.value })}
+            className="shadow-none rounded-sm font-mono"
           />
-        </div>
-        <div className="flex-1">
-          <label className="block text-sm font-medium">Doctor Name</label>
           <Input
-            placeholder="Filter by doctor"
-            value={filters.doctorName}
-            onChange={(e) => setFilters({ ...filters, doctorName: e.target.value })}
+            type="date"
+            value={filters.date}
+            onChange={e => setFilters({ ...filters, date: e.target.value })}
+            className="shadow-none rounded-sm font-mono"
           />
-        </div>
-        <div className="flex-1">
-          <label className="block text-sm font-medium">Status</label>
           <Select
             value={filters.status || "all"}
-            onValueChange={(value) =>
-              setFilters({ ...filters, status: value === "all" ? "" : value })
-            }
+            onValueChange={v => setFilters({ ...filters, status: v === "all" ? "" : v })}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
+            <SelectTrigger className="shadow-none rounded-sm font-mono">
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="Done">Done</SelectItem>
-              <SelectItem value="In Progress">In Progress</SelectItem>
-              <SelectItem value="Not Started">Not Started</SelectItem>
+              <SelectItem value="all">Status</SelectItem>
+              <SelectItem value="done">Done</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="not_started">Not Started</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <div className="flex-1">
-          <label className="block text-sm font-medium">Department</label>
+        <div className="grid md:grid-cols-3 grid-cols-2 gap-4">
+          <Input
+            placeholder="Filter by doctor"
+            value={filters.doctorName}
+            onChange={e => setFilters({ ...filters, doctorName: e.target.value })}
+            className="shadow-none rounded-sm font-mono"
+          />
           <Select
-            value={filters.departmentId || "all"}
-            onValueChange={(value) =>
-              setFilters({ ...filters, departmentId: value === "all" ? "" : value })
-            }
+            value={filters.doctorType || "all"}
+            onValueChange={v => setFilters({ ...filters, doctorType: v === "all" ? "" : v })}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by department" />
+            <SelectTrigger className="shadow-none rounded-sm font-mono">
+              <SelectValue placeholder="Doctor Type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">Dr's Type</SelectItem>
+              <SelectItem value="generalist">Generalist</SelectItem>
+              <SelectItem value="specialist">Specialist</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={filters.departmentId || "all"}
+            onValueChange={v => setFilters({ ...filters, departmentId: v === "all" ? "" : v })}
+          >
+            <SelectTrigger className="shadow-none rounded-sm font-mono">
+              <SelectValue placeholder="Department" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Department</SelectItem>
               {Object.entries(departmentMap).map(([id, name]) => (
-                <SelectItem key={id} value={id}>
-                  {name}
-                </SelectItem>
+                <SelectItem key={id} value={id}>{name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -270,13 +250,11 @@ export default function AppointmentTable() {
       <div className="overflow-auto rounded-lg border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                {headerGroup.headers.map(header => (
+                  <TableHead key={header.id} className="font-mono text-slate-600">
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
@@ -284,10 +262,10 @@ export default function AppointmentTable() {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map(row => (
                 <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                  {row.getVisibleCells().map(cell => (
+                    <TableCell key={cell.id} className="text-xs text-slate-600 font-mono">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -295,7 +273,7 @@ export default function AppointmentTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={allColumns.length} className="text-center py-4">
+                <TableCell colSpan={columns.length} className="text-center py-4 font-mono">
                   No appointments found.
                 </TableCell>
               </TableRow>

@@ -4,6 +4,7 @@ import { Department } from "./department.type"
 import { Appointment,User } from "./user.type"
 
 export interface Doctor {
+  isActive: string
   id: number
   uid: number
   user: User
@@ -22,6 +23,7 @@ export interface CreateDoctorRequest {
   license: string
   type: "Generalist" | "Specialist"
   departmentId: number
+  isActive:Boolean
 }
 
 export interface UpdateDoctorRequest extends Partial<CreateDoctorRequest> {}

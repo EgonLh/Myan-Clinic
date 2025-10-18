@@ -70,11 +70,11 @@ const data = {
       icon: IconFolder,
     },
   ],
-  navSecondary: [
+  About: [
     {
-      title: "Settings",
-      url: "/dashboard/admin/settings",
-      icon: IconSettings,
+      title: "Features",
+      url: "/dashboard/admin/features",
+      icon: IconDatabase,
     },
     {
       title: "Get Help",
@@ -84,31 +84,19 @@ const data = {
   ],
   Storage: [
     {
-      name: "Patient History",
+      title: "Patient History",
       url: "/dashboard/admin/patient-history",
       icon: IconDatabase,
     },
     {
-      name: "Document Storage",
+      title: "Document Storage",
       url: "/dashboard/admin/storages",
       icon: IconReport,
     },
     {
-      name: "Appointments",
+      title: "Appointments",
       url: "/dashboard/admin/appointments",
       icon: IconFileWord,
-    },
-  ],
-  Management: [
-    {
-      name: "Features",
-      url: "/dashboard/admin/features",
-      icon: IconDatabase,
-    },
-    {
-      name: "Feedback",
-      url: "/dashboard/admin/feedbacks",
-      icon: IconReport,
     },
   ],
 }
@@ -133,9 +121,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.Storage} />
-        <NavDocuments items={data.Management} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <div className="text-start ms-4 mt-6 text-xs font-mono">Storage</div>
+        <NavSecondary items={data.Storage} />
+        <div className="text-start mt-6 ms-4 text-xs font-mono">About</div>
+        <NavSecondary items={data.About} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

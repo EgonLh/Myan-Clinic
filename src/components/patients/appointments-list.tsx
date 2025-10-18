@@ -9,6 +9,7 @@ import {
   useGetAppointmentsByPatientQuery,
   useUploadInvoiceByAppointmentIdMutation,
   useCreateAppointmentMutation,
+  useUpdateAppointmentMutation,
 } from "@/app/store/features/appointment/appointmentApi"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
@@ -21,7 +22,7 @@ export function AppointmentsList({ patientId }: AppointmentsListProps) {
   const { data: appointments, isLoading } = useGetAppointmentsByPatientQuery(patientId)
   const [createAppointment] = useCreateAppointmentMutation()
   const [uploadInvoice] = useUploadInvoiceByAppointmentIdMutation()
-
+  const  [updateStatus] = useUpdateAppointmentMutation();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [appointmentType, setAppointmentType] = useState<"Video call" | "In-person">("In-person")
   const [doctorName, setDoctorName] = useState("")
@@ -48,26 +49,7 @@ export function AppointmentsList({ patientId }: AppointmentsListProps) {
   const uniqueDoctors = Array.from(new Set(appointments.map(a => a.doctor?.user?.name).filter(Boolean)))
   const uniqueStatuses = Array.from(new Set(appointments.map(a => a.status)))
 
-  // --- Create new appointment ---
-  const handleCreateAppointment = async () => {
-    if (!selectedDate || !doctorName) return alert("Please fill all fields")
-    try {
-      await createAppointment({
-        patientId,
-        doctorId: 1, // placeholder
-        date: selectedDate.toISOString(),
-        type: appointmentType,
-        status: "pending",
-      })
-      setOpenDialog(false)
-      setSelectedDate(null)
-      setDoctorName("")
-      alert("Appointment scheduled successfully")
-    } catch (err) {
-      console.error(err)
-      alert("Failed to schedule appointment")
-    }
-  }
+
 
   // --- Upload invoice for selected appointment ---
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,10 +57,13 @@ export function AppointmentsList({ patientId }: AppointmentsListProps) {
       setSelectedFile(e.target.files[0])
     }
   }
-
+  const pendingObj = {
+    status: "Pending" as "Pending"
+  }
   const handleUploadInvoice = async () => {
     if (!selectedFile || !detailDialog) return
     try {
+      await updateStatus({ id: Number(detailDialog.id), body: pendingObj })
       await uploadInvoice({ id: Number(detailDialog.id), file: selectedFile }).unwrap()
       alert("Invoice uploaded successfully")
       setSelectedFile(null)
@@ -123,7 +108,7 @@ export function AppointmentsList({ patientId }: AppointmentsListProps) {
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
-            
+
           </div>
 
           {/* --- Appointment Cards --- */}

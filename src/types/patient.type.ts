@@ -5,24 +5,19 @@ export interface Patient {
   gender: string;
   age: string;
   id: number;
-  name: string;
-  username: string;
-  email: string;
-  phone: string;
-  address: string;
-  dob: string; // date of birth
+  ph: string;
+  addr: string;
   createdAt: string;
   updatedAt: string;
   user:User
 }
 
-export interface CreatePatientRequest {
-  name: string;
-  username: string;
-  email: string;
-  phone: string;
-  address: string;
-  condition : string;
-}
+  export interface CreatePatientRequest {
+    ph: string;
+    addr: string;
+    age:Number
+    payment?:string;
+    condition : string;
+  }
 
 export interface UpdatePatientRequest extends Partial<CreatePatientRequest> {}

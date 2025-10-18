@@ -1,13 +1,13 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Upload, Camera, X, Loader2, Pill, AlertTriangle, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useUploadMedicineMutation } from "@/app/store/features/ai-services/appApi" // import your RTK mutation
 
 interface IdentificationResult {
   name: string
@@ -19,48 +19,59 @@ interface IdentificationResult {
 }
 
 export function MedicineIdentifier() {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [result, setResult] = useState<IdentificationResult | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [uploadMedicine, { isLoading: isUploading }] = useUploadMedicineMutation()
+
+  // Handle local preview
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
+      setSelectedFile(file)
       const reader = new FileReader()
-      reader.onload = (e) => {
-        setSelectedImage(e.target?.result as string)
-        setResult(null)
-      }
+      reader.onload = (e) => setPreviewImage(e.target?.result as string)
       reader.readAsDataURL(file)
+      setResult(null)
     }
   }
 
+  // Handle medicine identification
   const handleAnalyze = async () => {
-    if (!selectedImage) return
+    if (!selectedFile) return
 
     setIsAnalyzing(true)
+    try {
+      // Upload the file to backend
+      const response = await uploadMedicine(selectedFile).unwrap()
+      console.log("Upload response:", response)
 
-    // Simulate API call - replace with actual backend integration
-    setTimeout(() => {
-      setResult({
-        name: "Lisinopril",
-        confidence: 94,
-        dosage: "10mg",
-        manufacturer: "Lupin Pharmaceuticals",
-        warnings: ["Take with food", "May cause dizziness", "Monitor blood pressure"],
-        description: "ACE inhibitor used to treat high blood pressure and heart failure",
-      })
+      // Simulate result based on response or replace with actual backend data
+      setTimeout(() => {
+        setResult({
+          name: "Lisinopril",
+          confidence: 94,
+          dosage: "10mg",
+          manufacturer: "Lupin Pharmaceuticals",
+          warnings: ["Take with food", "May cause dizziness", "Monitor blood pressure"],
+          description: "ACE inhibitor used to treat high blood pressure and heart failure",
+        })
+        setIsAnalyzing(false)
+      }, 1000)
+    } catch (err) {
+      console.error("Upload failed:", err)
       setIsAnalyzing(false)
-    }, 3000)
+    }
   }
 
   const clearImage = () => {
-    setSelectedImage(null)
+    setSelectedFile(null)
+    setPreviewImage(null)
     setResult(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
+    if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
   return (
@@ -83,7 +94,7 @@ export function MedicineIdentifier() {
             <CardDescription>Take a clear photo of your pill or medication packaging</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {!selectedImage ? (
+            {!previewImage ? (
               <div
                 className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
@@ -95,11 +106,7 @@ export function MedicineIdentifier() {
               </div>
             ) : (
               <div className="relative">
-                <img
-                  src={selectedImage || "/placeholder.svg"}
-                  alt="Selected medicine"
-                  className="w-full h-64 object-cover rounded-lg"
-                />
+                <img src={previewImage} alt="Selected medicine" className="w-full h-64 object-cover rounded-lg" />
                 <Button variant="destructive" size="icon" className="absolute top-2 right-2" onClick={clearImage}>
                   <X className="w-4 h-4" />
                 </Button>
@@ -108,16 +115,20 @@ export function MedicineIdentifier() {
 
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
 
-            {selectedImage && (
-              <Button onClick={handleAnalyze} disabled={isAnalyzing} className="w-full">
-                {isAnalyzing ? (
+            {selectedFile && (
+              <Button
+                onClick={handleAnalyze}
+                disabled={isAnalyzing || isUploading}
+                className="w-full flex justify-center items-center gap-2"
+              >
+                {isAnalyzing || isUploading ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Analyzing...
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {isUploading ? "Uploading..." : "Analyzing..."}
                   </>
                 ) : (
                   <>
-                    <Pill className="w-4 h-4 mr-2" />
+                    <Pill className="w-4 h-4" />
                     Identify Medicine
                   </>
                 )}
@@ -208,43 +219,6 @@ export function MedicineIdentifier() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Recent Identifications */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Identifications</CardTitle>
-          <CardDescription>Your previously identified medications</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <Pill className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">Metformin 500mg</p>
-                  <p className="text-sm text-muted-foreground">Identified 2 days ago</p>
-                </div>
-              </div>
-              <Badge variant="outline">97% match</Badge>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <Pill className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">Atorvastatin 20mg</p>
-                  <p className="text-sm text-muted-foreground">Identified 1 week ago</p>
-                </div>
-              </div>
-              <Badge variant="outline">92% match</Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }

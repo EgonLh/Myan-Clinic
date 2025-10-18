@@ -239,7 +239,7 @@ export default function PatientsPage() {
 
         {/* Patient Detail Modal */}
         <Dialog open={!!selectedPatientId} onOpenChange={() => setSelectedPatientId(null)}>
-          <DialogContent className="max-w-md">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>Patient Details</DialogTitle>
               <DialogDescription>View and update patient information</DialogDescription>

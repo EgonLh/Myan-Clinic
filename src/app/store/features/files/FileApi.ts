@@ -19,9 +19,9 @@ export const fileApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "File" as const, id })),
-              { type: "File", id: "LIST" },
-            ]
+            ...result.map(({ id }) => ({ type: "File" as const, id })),
+            { type: "File", id: "LIST" },
+          ]
           : [{ type: "File", id: "LIST" }],
     }),
 
@@ -37,10 +37,10 @@ export const fileApi = createApi({
         const formData = new FormData()
         formData.append("log", body.log)
         formData.append("storageId", String(body.storageId))
-        formData.append("file", file) // Multer will parse this
+        formData.append("file", file)
 
         return {
-          url: "/files",
+          url: "/files/upload",
           method: "POST",
           body: formData,
         }
@@ -76,6 +76,16 @@ export const fileApi = createApi({
         { type: "File", id: "LIST" },
       ],
     }),
+
+    // 📥 DOWNLOAD file by ID
+    downloadFile: builder.query<Blob, number>({
+      query: (id) => ({
+        url: `/files/${id}/download`,
+        method: "GET",
+        responseHandler: async (response) => await response.blob(),
+      }),
+    })
+
   }),
 })
 
@@ -85,4 +95,5 @@ export const {
   useCreateFileMutation,
   useUpdateFileMutation,
   useDeleteFileMutation,
+  useDownloadFileQuery,
 } = fileApi

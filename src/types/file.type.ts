@@ -1,3 +1,4 @@
+import { File } from "buffer"
 import { IStorage } from "./storage.type"
 
 export interface IFile {
@@ -13,7 +14,6 @@ export interface IFile {
 
 export interface CreateFileRequest {
   storageId: number
-  filename: string
   log?: string
 }
 

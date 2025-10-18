@@ -23,7 +23,7 @@ export interface Appointment {
 
 export interface CreateAppointmentRequest {
   patientId: number
-  doctorId: number
+  doctorId?: number
   date: string
   status?: "Pending" | "Confirmed" | "Done" | "Cancelled" | "not_started"
   duration ?: number

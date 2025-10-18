@@ -8,10 +8,10 @@ import { Separator } from "@/components/ui/separator"
 
 export default function AdminHelpPage() {
   return (
-    <div className="p-6 lg:p-12 min-h-screen flex flex-col md:flex-row gap-6 bg-gray-50 text-gray-900">
+    <div className="p-6 lg:p-12 min-h-screen flex flex-col md:flex-row gap-6 bg-gray-50 text-gray-900 font-mono">
       
       {/* Sidebar */}
-      <aside className="w-full md:w-1/4 bg-white rounded-lg p-4 shadow-sm space-y-4">
+      <aside className="w-full md:w-1/4 bg-white rounded border border-dashed border-gray-300 p-4 space-y-4">
         <h2 className="text-lg font-bold mb-2">Admin Dashboard Manual</h2>
         <ul className="space-y-2 text-sm">
           <li><a href="#overview" className="hover:text-blue-600">Overview</a></li>
@@ -24,41 +24,39 @@ export default function AdminHelpPage() {
       </aside>
 
       {/* Main content */}
-      <ScrollArea className="flex-1 bg-white rounded-lg p-6 shadow-sm space-y-6">
+      <ScrollArea className="flex-1 bg-white rounded border border-dashed border-gray-300 p-6 space-y-6">
         
         {/* Overview */}
-        <Card id="overview">
+        <Card id="overview" className="border-dashed border border-gray-200 bg-white rounded-none shadow-none">
           <CardHeader>
-            <CardTitle>Overview</CardTitle>
+            <CardTitle className="font-mono text-sm">Overview</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p>
-              The Admin Dashboard provides a complete overview of the hospital management system.
-              You can manage users, appointments, feedback, analytics, and system settings.
-            </p>
+          <CardContent className="font-mono text-sm leading-relaxed">
+            <p>The Admin Dashboard provides a complete overview of the hospital management system.</p>
+            <p>Manage users, appointments, feedback, analytics, and system settings from a single place.</p>
           </CardContent>
         </Card>
 
-        <Separator />
+        <Separator className="border-dashed border-gray-200" />
 
         {/* Users */}
-        <Card id="users">
+        <Card id="users" className="border-dashed border border-gray-200 bg-white rounded-none shadow-none">
           <CardHeader>
-            <CardTitle>Users Management</CardTitle>
+            <CardTitle className="font-mono text-sm">Users Management</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="font-mono text-sm leading-relaxed">
             <Accordion type="single" collapsible>
               <AccordionItem value="view-users">
-                <AccordionTrigger>Viewing Users</AccordionTrigger>
-                <AccordionContent>
-                  <p>You can view all registered users with their roles, status, and ratings.</p>
+                <AccordionTrigger className="font-mono text-sm">Viewing Users</AccordionTrigger>
+                <AccordionContent className="font-mono text-sm">
+                  <p>View all registered users with their roles, status, and ratings.</p>
                   <p>Filters are available for name, role, and minimum rating.</p>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="edit-users">
-                <AccordionTrigger>Editing Users</AccordionTrigger>
-                <AccordionContent>
+                <AccordionTrigger className="font-mono text-sm">Editing Users</AccordionTrigger>
+                <AccordionContent className="font-mono text-sm">
                   <p>Admins can edit user information, change roles, and reset passwords.</p>
                 </AccordionContent>
               </AccordionItem>
@@ -66,67 +64,67 @@ export default function AdminHelpPage() {
           </CardContent>
         </Card>
 
-        <Separator />
+        <Separator className="border-dashed border-gray-200" />
 
         {/* Appointments */}
-        <Card id="appointments">
+        <Card id="appointments" className="border-dashed border border-gray-200 bg-white rounded-none shadow-none">
           <CardHeader>
-            <CardTitle>Appointments Management</CardTitle>
+            <CardTitle className="font-mono text-sm">Appointments Management</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="font-mono text-sm leading-relaxed">
             <Accordion type="single" collapsible>
               <AccordionItem value="view-appointments">
-                <AccordionTrigger>Viewing Appointments</AccordionTrigger>
-                <AccordionContent>
+                <AccordionTrigger className="font-mono text-sm">Viewing Appointments</AccordionTrigger>
+                <AccordionContent className="font-mono text-sm">
                   <p>Appointments can be filtered by patient, doctor, status, and department.</p>
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="manage-appointments">
-                <AccordionTrigger>Managing Appointments</AccordionTrigger>
-                <AccordionContent>
-                  <p>Admins can mark appointments as Done or delete them. Notes can be viewed in a dialog.</p>
+                <AccordionTrigger className="font-mono text-sm">Managing Appointments</AccordionTrigger>
+                <AccordionContent className="font-mono text-sm">
+                  <p>Admins can mark appointments as done or view notes directly in a modal dialog.</p>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
           </CardContent>
         </Card>
 
-        <Separator />
+        <Separator className="border-dashed border-gray-200" />
 
         {/* Feedback */}
-        <Card id="feedback">
+        <Card id="feedback" className="border-dashed border border-gray-200 bg-white rounded-none shadow-none">
           <CardHeader>
-            <CardTitle>Feedback & Ratings</CardTitle>
+            <CardTitle className="font-mono text-sm">Feedback & Ratings</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p>Feedback from patients can be searched and filtered by rating and role. View details in a dialog.</p>
+          <CardContent className="font-mono text-sm leading-relaxed">
+            <p>Feedback from patients can be searched and filtered by rating and role.</p>
+            <p>View details in a modal dialog without extra UI distractions.</p>
           </CardContent>
         </Card>
 
-        <Separator />
+        <Separator className="border-dashed border-gray-200" />
 
         {/* Analytics */}
-        <Card id="analytics">
+        <Card id="analytics" className="border-dashed border border-gray-200 bg-white rounded-none shadow-none">
           <CardHeader>
-            <CardTitle>Analytics & Reports</CardTitle>
+            <CardTitle className="font-mono text-sm">Analytics & Reports</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p>View live charts for appointments, patient growth, and system usage. Supports export for reporting.</p>
+          <CardContent className="font-mono text-sm leading-relaxed">
+            <p>View charts for appointments, patient growth, and system usage.</p>
+            <p>Supports exporting reports for further analysis.</p>
           </CardContent>
         </Card>
 
-        <Separator />
+        <Separator className="border-dashed border-gray-200" />
 
         {/* Settings */}
-        <Card id="settings">
+        <Card id="settings" className="border-dashed border border-gray-200 bg-white rounded-none shadow-none">
           <CardHeader>
-            <CardTitle>Settings</CardTitle>
+            <CardTitle className="font-mono text-sm">Settings</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p>
-              Configure account settings, roles & permissions, notifications, and system preferences.
-            </p>
+          <CardContent className="font-mono text-sm leading-relaxed">
+            <p>Configure account settings, roles & permissions, notifications, and system preferences.</p>
             <p>Advanced options include database backup, integrations, and maintenance mode.</p>
           </CardContent>
         </Card>

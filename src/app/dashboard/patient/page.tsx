@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import CreateAppointment from "../doctor/create-appointment/page"
 import CreateAppointmentByPatient from "@/components/patients/create-appointments"
+import { PatientStorage } from "@/components/patients/patient-storage"
 
 export default function PatientDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
@@ -230,6 +231,8 @@ export default function PatientDashboard() {
         return <MedicineIdentifier />
       case "records":
         return <MedicalRecords patientId={patientId} />
+      case "storage":
+        return <PatientStorage patientId={patientId} />
       default:
         return (
           <Card>

@@ -30,7 +30,7 @@ export function NavMain({
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton tooltip={item.title}>
                 {item.icon && <item.icon />}
-                <Link href={item.url}>{item.title}</Link>
+                <Link href={item.url} className="font-mono hover:font-medium text-sm">{item.title}</Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

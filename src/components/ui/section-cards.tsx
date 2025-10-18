@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useGetAppointmentsStatusQuery, useGetSummaryQuery } from "@/app/store/features/analysis/analysisApi";
+import LoadingPills from "./loading";
 export function SectionCards() {
   // Fetch summary and appointments data from backend
   const { data: summary, isLoading: summaryLoading } = useGetSummaryQuery();
@@ -55,7 +56,7 @@ export function SectionCards() {
     },
   ];
 
-  if (summaryLoading) return <p>Loading analytics...</p>;
+  if (summaryLoading) return <div><LoadingPills message="Loading Analysis"/></div>;
 
   return (
     <div className="*:data-[slot=card]:bg-muted *:data-[slot=card]:rounded-md *:data-[slot=card]:border *:data-[slot=card]:shadow-none hover:bg-white/50 grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
