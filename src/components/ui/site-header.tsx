@@ -1,5 +1,6 @@
 "use client"
-
+// ----- Siteheader for Admin ----- //
+// - Review[x]
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "@/components/ui/breadcrumb"
 import { usePathname } from "next/navigation"
@@ -17,7 +18,7 @@ export function SiteHeader() {
   const pathname = usePathname() || "/"
   const pathSegments = pathname.split("/").filter(Boolean)
 
-  // Build breadcrumbs dynamically
+  // ----- Generate breadcrumb items from current route ----- //
   const breadcrumbs = pathSegments.map((segment, idx) => {
     const href = "/" + pathSegments.slice(0, idx + 1).join("/")
     const name = segment
@@ -27,7 +28,7 @@ export function SiteHeader() {
     return { name, href }
   })
 
-  // Define help content per route
+  // ----- Define contextual help content per route ----- //
   const helpContent: Record<
     string,
     {
@@ -36,25 +37,40 @@ export function SiteHeader() {
       sections: { title: string; text: string }[]
     }
   > = {
-    "/admin": {
+    // ----- Admin Root Dashboard ----- //
+    "/dashboard/admin": {
       title: "Root Admin Dashboard Manual",
       description: "Quick overview of the admin system and how to navigate it.",
       sections: [
         { title: "Navigation", text: "Use the sidebar to move between key sections." },
         { title: "Breadcrumbs", text: "Track your current position and navigate back easily." },
-        { title: "Customization", text: "You can personalize dashboard settings and layout here." },
+        { title: "Dashboard", text: "You can Overview of the system, total data and appointments list in this page" },
       ],
     },
-    "/appointments": {
-      title: "Appointments Management Guide",
-      description: "Manage, filter, and track patient appointments efficiently.",
+
+    // ----- Admin Root Dashboard ----- //
+    "/dashboard/admin/permissions": {
+      title: "Permission Dashboard Manual",
+      description: "Quick overview of all users in the system.",
       sections: [
-        { title: "Filtering", text: "Use filters to find appointments by doctor, patient, or date." },
-        { title: "Status", text: "Track appointment progress — confirmed, pending, or done." },
+        { title: "Overview", text: "Check Detail Information for All Users " },
+        { title: "Functions", text: "Update and Delete All Users " },
+      ],
+    },
+
+    // ----- Analytics Overview ----- //
+    "/dashboard/admin/analytics": {
+      title: "Analytics Management Guide",
+      description: "View The Overview of the system effectivelys.",
+      sections: [
+        { title: "Overview", text: "In Cards, The Clear Analysis of The System is Provided" },
+        { title: "Charts", text: "The Charts Based on Doctors and Departs Which Are Importnat Pills of The System are Provided For Monitoring" },
         { title: "Analytics", text: "View trends and daily appointment statistics." },
       ],
     },
-    "/doctors": {
+
+    // ----- Doctor Management ----- //
+    "/dashboard/admin/doctors": {
       title: "Doctor Management Manual",
       description: "Add, edit, and manage doctors and their associated departments.",
       sections: [
@@ -63,7 +79,9 @@ export function SiteHeader() {
         { title: "Doctor Analytics", text: "View patient load, appointments per doctor, and performance data." },
       ],
     },
-    "/patients": {
+
+    // ----- Patients Management ----- //
+    "/dashboard/admin/patients": {
       title: "Patient Management Guide",
       description: "View, edit, and track patient information, history, and reports.",
       sections: [
@@ -71,17 +89,84 @@ export function SiteHeader() {
         { title: "Reports", text: "Generate or export health reports and appointment summaries." },
       ],
     },
-    "/departments": {
+
+    // ----- Patient History ----- //
+    "/dashboard/admin/patient-history": {
+      title: "Patient History Overview",
+      description: "Access complete medical and appointment history for each patient.",
+      sections: [
+        { title: "Timeline", text: "Review a chronological view of past visits and treatments." },
+        { title: "Records", text: "Access linked health reports and prescription details." },
+        { title: "Export", text: "Export patient history for offline documentation or transfer." },
+      ],
+    },
+
+    // ----- Departments Management ----- //
+    "/dashboard/admin/departments": {
       title: "Department Management Manual",
       description: "Manage hospital departments, their staff, and related analytics.",
       sections: [
         { title: "Department Overview", text: "See all active departments and assigned doctors." },
         { title: "Editing Departments", text: "Rename or update department descriptions easily." },
+        { title: "Department Insights", text: "View performance metrics and doctor distribution." },
+      ],
+    },
+
+    // ----- Single Department (Detail Page) ----- //
+    "/dashboard/admin/department": {
+      title: "Department Detail Guide",
+      description: "View and manage specific department data and assigned doctors.",
+      sections: [
+        { title: "Doctor Assignment", text: "View which doctors are assigned to this department." },
+        { title: "Performance", text: "Check appointment statistics for this department." },
+        { title: "Update Info", text: "Edit department name or description directly." },
+      ],
+    },
+
+    // ----- Storage / File Management ----- //
+    "/dashboard/admin/storages": {
+      title: "Storage Management Manual",
+      description: "Upload, manage, and organize digital files like patient records and reports.",
+      sections: [
+        { title: "Uploading Files", text: "Use the upload button to store reports or media securely." },
+        { title: "Categories", text: "Group files by type — reports, scans, prescriptions, etc." },
+        { title: "Access Control", text: "Manage file permissions for doctors and staff." },
+      ],
+    },
+
+    // ----- Features Overview ----- //
+    "/dashboard/admin/features": {
+      title: "System Features Overview",
+      description: "Learn about all integrated modules and tools available to admins.",
+      sections: [
+        { title: "Analytics Module", text: "Visualize doctor and appointment statistics." },
+        { title: "Reports", text: "Generate health summaries and departmental analytics." },
+        { title: "Integrations", text: "Connect with external APIs or hospital systems." },
+      ],
+    },
+    // ----- Features Overview ----- //
+    "/dashboard/admin/appointments": {
+      title: "All Appointments Overview",
+      description: "Learn about all appointments To The system.",
+      sections: [
+        { title: "Filters", text: "Use Filters To Track Appointments and Its Information" },
+        { title: "Reports", text: "Check Detail Informations Of All Appointments" },
+      ],
+    },
+
+    // ----- Help / Documentation ----- //
+    "/dashboard/admin/help": {
+      title: "Help & Support Center",
+      description: "Access documentation, tutorials, and troubleshooting resources.",
+      sections: [
+        { title: "User Manual", text: "Comprehensive guide for each dashboard feature." },
+        { title: "FAQs", text: "Get quick answers to common administrative questions." },
+        { title: "Support", text: "Contact technical support or file a help ticket." },
       ],
     },
   }
 
-  // Fallback help content
+  // ----- Default help content when route not defined ----- //
   const defaultHelp = {
     title: "Dashboard Help",
     description: "General overview of how to use the dashboard efficiently.",
@@ -92,20 +177,21 @@ export function SiteHeader() {
     ],
   }
 
-  // Determine which help to use
-  const routeKey = Object.keys(helpContent).find((key) => pathname.startsWith(key))
-  const currentHelp = routeKey ? helpContent[routeKey] : defaultHelp
+  // ----- Determine which help section to display ----- //
+  const routeKey = Object.keys(helpContent).find((key) => pathname === key)
 
+  const currentHelp = routeKey ? helpContent[routeKey] : defaultHelp
   return (
-    <header className="flex h-[var(--header-height)] shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
+    <header className="flex h-[var(--header-height)] shrink-0 items-center gap-2 border-b-1 border-dashed transition-[width,height] ease-linear">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+        {/* --- Sidebar Toggle --- */}
         <SidebarTrigger className="-ml-1" />
 
-        {/* Breadcrumb */}
+        {/* --- Breadcrumb Navigation --- */}
         <Breadcrumb className="ml-2 font-mono bg-muted p-1 border rounded text-xs">
           {breadcrumbs.length === 0 ? (
             <BreadcrumbItem>
-              <span className="text-gray-700 dark:text-gray-300">Dashboard</span>
+              <span className="text-gray-700 dark:text-gray-300 hidden ">Dashboard</span>
             </BreadcrumbItem>
           ) : (
             breadcrumbs.map((crumb, idx) => (
@@ -118,7 +204,7 @@ export function SiteHeader() {
                     className="text-gray-500 flex hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                   >
                     {crumb.name}
-                    <div className="hidden sm:block mx-2">/</div>
+                    <div className="mx-2">/</div>
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
@@ -126,23 +212,23 @@ export function SiteHeader() {
           )}
         </Breadcrumb>
 
-        {/* Help Sheet */}
+        {/* --- Route-Specific Help Drawer --- */}
         <div className="ml-auto flex items-center gap-2">
           <Sheet>
             <SheetTrigger asChild>
-              <ScanEye className="hover:bg-muted hover:border w-5 h-5 p-1 rounded cursor-pointer transition" />
+              <ScanEye className="hover:bg-muted hover:border w-7 h-7 p-1 rounded cursor-pointer transition" />
             </SheetTrigger>
             <SheetContent side="right" className="w-96 p-6 overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>{currentHelp.title}</SheetTitle>
-                <SheetDescription>{currentHelp.description}</SheetDescription>
+              <SheetHeader className="border rounded m-3 bg-slate-100/[0.1] border-dashed border-2">
+                <SheetTitle className="font-mono">{currentHelp.title}</SheetTitle>
+                <SheetDescription className="font-mono text-xs text-justify">{currentHelp.description}</SheetDescription>
               </SheetHeader>
 
               <div className="mt-4 space-y-4 text-sm text-gray-700 dark:text-gray-300">
                 {currentHelp.sections.map((s, i) => (
                   <section key={i}>
-                    <h3 className="font-semibold mb-1">{s.title}</h3>
-                    <p>{s.text}</p>
+                    <h3 className="font-semibold mb-1 font-mono underline">{s.title}</h3>
+                    <p className="tracking-wide text-xs text-balance">{s.text}</p>
                   </section>
                 ))}
               </div>

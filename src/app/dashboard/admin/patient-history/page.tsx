@@ -1,15 +1,17 @@
-"use client"
+//----- Patient History Dashboard -----//
+//- Reviews[x]
+"use client";
 
-import * as React from "react"
-import { useGetAppointmentsQuery } from "@/app/store/features/appointment/appointmentApi"
-import { Appointment } from "@/types/appointment.type"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
+import * as React from "react";
+import { useGetAppointmentsQuery } from "@/app/store/features/appointment/appointmentApi";
+import { Appointment } from "@/types/appointment.type";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -19,97 +21,99 @@ import {
   SheetFooter,
   SheetClose,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/components/ui/sheet";
 
 export default function PatientHistoryPage() {
-  const { data: appointments = [], isLoading, isError } = useGetAppointmentsQuery()
+  // Fetch appointments
+  const { data: appointments = [], isLoading, isError } = useGetAppointmentsQuery();
 
-  const [search, setSearch] = React.useState("")
-  const [statusFilter, setStatusFilter] = React.useState<string>("All")
-  const [dateFilter, setDateFilter] = React.useState<string>("All")
-  const [selectedAppointment, setSelectedAppointment] = React.useState<Appointment | null>(null)
+  // -------------------- State --------------------
+  const [search, setSearch] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState<string>("All");
+  const [dateFilter, setDateFilter] = React.useState<string>("All");
+  const [selectedAppointment, setSelectedAppointment] = React.useState<Appointment | null>(null);
 
-  // ✅ Date filter logic
+  // -------------------- Date Filter Logic --------------------
   const isWithinDateFilter = (date: string): boolean => {
-    const d = new Date(date)
-    const now = new Date()
+    const d = new Date(date);
+    const now = new Date();
 
-    if (dateFilter === "Today") return d.toDateString() === now.toDateString()
-    if (dateFilter === "This Month")
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-    if (dateFilter === "This Year") return d.getFullYear() === now.getFullYear()
-    return true
-  }
+    if (dateFilter === "Today") return d.toDateString() === now.toDateString();
+    if (dateFilter === "This Month") return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    if (dateFilter === "This Year") return d.getFullYear() === now.getFullYear();
+    return true; // "All" time
+  };
 
-  // ✅ Filtered data
+  // -------------------- Filtered Data --------------------
   const filteredData = appointments.filter((item: Appointment) => {
     const matchesSearch =
       item.patient?.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
-      item.doctor?.user?.name?.toLowerCase().includes(search.toLowerCase())
-    const matchesStatus = statusFilter === "All" || item.status === statusFilter
-    const matchesDate = isWithinDateFilter(item.date)
-    return matchesSearch && matchesStatus && matchesDate
-  })
+      item.doctor?.user?.name?.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === "All" || item.status === statusFilter;
+    const matchesDate = isWithinDateFilter(item.date);
+    return matchesSearch && matchesStatus && matchesDate;
+  });
 
-  // ✅ Downloads
+  // -------------------- Download Functions --------------------
   const downloadJSON = () => {
-    const blob = new Blob([JSON.stringify(filteredData, null, 2)], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = "patient_history.json"
-    link.click()
-    URL.revokeObjectURL(url)
-  }
+    const blob = new Blob([JSON.stringify(filteredData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "patient_history.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const downloadCSV = () => {
-    const headers = ["Patient", "Doctor", "Date", "Notes", "Status"]
+    const headers = ["Patient", "Doctor", "Date", "Notes", "Status"];
     const rows = filteredData.map((d) => [
       d.patient?.user?.name,
       d.doctor?.user?.name,
       d.date,
       d.notes ?? "N/A",
       d.status,
-    ])
-    const csvContent = [headers, ...rows].map((r) => r.join(",")).join("\n")
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = "patient_history.csv"
-    link.click()
-    URL.revokeObjectURL(url)
-  }
+    ]);
+    const csvContent = [headers, ...rows].map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "patient_history.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
-  // ✅ Clear filters & reset dropdown UI
+  // -------------------- Clear Filters --------------------
   const handleClearFilters = () => {
-    setSearch("")
-    setStatusFilter("All")
-    setDateFilter("All")
-  }
+    setSearch("");
+    setStatusFilter("All");
+    setDateFilter("All");
+  };
 
   return (
     <div className="p-4 lg:p-6 space-y-4 font-mono">
       <h1 className="text-2xl font-bold">Patient History</h1>
 
-      {/* Search & Filters */}
+      {/* -------------------- Search & Filters -------------------- */}
       <div className="flex flex-col md:flex-row items-start md:items-end gap-4 flex-wrap">
-        <div className="flex-1">
+        {/* -------------------- Search input -------------------- */}
+        <div className="flex-1 min-w-[200px]">
           <Label htmlFor="search" className="mb-2">Search Patient / Doctor</Label>
           <Input
             id="search"
             placeholder="Enter patient or doctor name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="rounded-sm border border-gray-300"
+            className="w-full rounded-sm shadow-none border border-gray-300"
           />
         </div>
 
-        {/* Status filter */}
-        <div>
+        {/* -------------------- Status filter -------------------- */}
+        <div className="min-w-[160px] w-full md:w-auto">
           <Label htmlFor="statusFilter" className="mb-2">Filter by Status</Label>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger id="statusFilter" className="w-48 rounded-sm border border-gray-300">
+            <SelectTrigger id="statusFilter" className="w-full md:w-48 shadow-none rounded-sm border border-gray-300">
               <SelectValue placeholder="All Status">{statusFilter}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -122,11 +126,11 @@ export default function PatientHistoryPage() {
           </Select>
         </div>
 
-        {/* Date filter */}
-        <div>
+        {/* -------------------- Date filter -------------------- */}
+        <div className="min-w-[160px] w-full md:w-auto">
           <Label htmlFor="dateFilter" className="mb-2">Filter by Date</Label>
           <Select value={dateFilter} onValueChange={setDateFilter}>
-            <SelectTrigger id="dateFilter" className="w-48 rounded-sm border border-gray-300">
+            <SelectTrigger id="dateFilter" className="w-full md:w-48 shadow-none rounded-sm border border-gray-300">
               <SelectValue placeholder="All Time">{dateFilter}</SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -138,38 +142,24 @@ export default function PatientHistoryPage() {
           </Select>
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-2 mt-2 md:mt-0">
-          <Button
-            onClick={handleClearFilters}
-            variant="destructive"
-            size="sm"
-            className="rounded-sm border border-gray-300"
-          >
+        {/* -------------------- Action buttons -------------------- */}
+        <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
+          <Button onClick={handleClearFilters} variant="ghost" size="sm" className="rounded-sm border border-gray-300">
             Clear
           </Button>
-          <Button
-            onClick={downloadCSV}
-            variant="outline"
-            size="sm"
-            className="rounded-sm border border-gray-300"
-          >
+          <Button onClick={downloadCSV} variant="outline" size="sm" className="rounded-sm border border-gray-300">
             CSV
           </Button>
-          <Button
-            onClick={downloadJSON}
-            variant="outline"
-            size="sm"
-            className="rounded-sm border border-gray-300"
-          >
+          <Button onClick={downloadJSON} variant="outline" size="sm" className="rounded-sm border border-gray-300">
             JSON
           </Button>
         </div>
       </div>
 
+
       <Separator />
 
-      {/* Table */}
+      {/* -------------------- Appointments Table -------------------- */}
       {isLoading ? (
         <p>Loading appointments...</p>
       ) : isError ? (
@@ -200,6 +190,8 @@ export default function PatientHistoryPage() {
                         {record.status}
                       </Badge>
                     </TableCell>
+
+                    {/* Appointment Details Sheet */}
                     <TableCell>
                       <Sheet
                         open={selectedAppointment?.id === record.id}
@@ -210,15 +202,13 @@ export default function PatientHistoryPage() {
                             View
                           </Button>
                         </SheetTrigger>
-                        <SheetContent
-                          side="right"
-                          className="w-full md:w-96 lg:w-[40vw] rounded-sm font-mono border-dotted border"
-                        >
+                        <SheetContent side="right" className="w-full md:w-96 lg:w-[40vw] rounded-sm font-mono border-dotted border">
                           <SheetHeader>
                             <SheetTitle>Appointment Details</SheetTitle>
                             <SheetDescription>Details for {record.patient?.user?.name}</SheetDescription>
                           </SheetHeader>
 
+                          {/* Display details in Title: Value style */}
                           <div className="p-4 mt-2 space-y-2 text-sm">
                             {[
                               ["Patient", record.patient?.user?.name],
@@ -239,9 +229,7 @@ export default function PatientHistoryPage() {
 
                           <SheetFooter className="flex justify-end pt-4">
                             <SheetClose asChild>
-                              <Button variant="outline" className="rounded-sm">
-                                Close
-                              </Button>
+                              <Button variant="outline" className="rounded-sm">Close</Button>
                             </SheetClose>
                           </SheetFooter>
                         </SheetContent>
@@ -261,5 +249,5 @@ export default function PatientHistoryPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

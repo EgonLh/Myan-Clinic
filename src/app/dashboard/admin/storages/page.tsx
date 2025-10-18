@@ -1,5 +1,6 @@
 "use client"
-
+// ----- Storage of Patients ----- //
+// - Review [x]
 import * as React from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -15,13 +16,13 @@ import { useGetPatientsQuery } from "@/app/store/features/patient/patientApi"
 
 export default function DocumentStoragePage() {
   const [search, setSearch] = React.useState("")
-  const [selectedPatient, setSelectedPatient] = React.useState<Patient | null>(null)
+  const [selectedPatient, setSelectedPatient] = React.useState<any | null>(null)
   const [selectedFileId, setSelectedFileId] = React.useState<number | null>(null)
 
-  // ✅ Patients with related user info
+  // Patients with related user info
   const { data: patientsData, isLoading: isPatientsLoading } = useGetPatientsQuery()
 
-  const patients: Patient[] = (patientsData ?? []).map(p => ({
+  const patients = (patientsData ?? []).map(p => ({
     id: p.id,
     name: p.user?.name ?? "",
     email: p.user?.email ?? "",
@@ -30,35 +31,35 @@ export default function DocumentStoragePage() {
     updatedAt: p.user?.updatedAt ?? "",
   }))
 
-  // ✅ Filtered patients
+  //  Filtered patients
   const filteredPatients = patients.filter(p =>
     (p.name ?? "").toLowerCase().includes(search.toLowerCase())
   )
 
-  // ✅ Files for selected patient
+  //  Files for selected patient
   const { data: files = [], isLoading: isFilesLoading } = useGetFilesByStorageQuery(selectedPatient?.id ?? 0, {
     skip: !selectedPatient,
   })
 
-  // ✅ Single file download (via API)
+  //  Single file download (via API)
   const { data: downloadedBlob } = useDownloadFileQuery(selectedFileId!, {
     skip: !selectedFileId,
   })
 
   React.useEffect(() => {
-  if (downloadedBlob && selectedFileId !== null) {
-    const url = URL.createObjectURL(downloadedBlob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `file_${selectedFileId}.pdf`
-    a.click()
-    URL.revokeObjectURL(url)
-    setSelectedFileId(null) // reset selected file
-  }
-}, [downloadedBlob]) // <-- remove selectedFileId from dependency
+    if (downloadedBlob && selectedFileId !== null) {
+      const url = URL.createObjectURL(downloadedBlob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `file_${selectedFileId}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+      setSelectedFileId(null) // reset selected file
+    }
+  }, [downloadedBlob])
 
 
-  // ✅ Generate PDF of all file names
+  //  Generate PDF of all file names
   const downloadPDF = () => {
     if (!selectedPatient || !files.length) return
     const doc = new jsPDF()
@@ -92,7 +93,7 @@ export default function DocumentStoragePage() {
             placeholder="Enter patient name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="rounded-sm border max-w-80 border-gray-300"
+            className="rounded-sm shadow-none border max-w-80 border-gray-300"
           />
         </div>
       </div>
@@ -117,9 +118,9 @@ export default function DocumentStoragePage() {
               {filteredPatients.length > 0 ? (
                 filteredPatients.map((patient) => (
                   <TableRow key={patient.id}>
-                    <TableCell>{patient.name}</TableCell>
-                    <TableCell>{patient.email}</TableCell>
-                    <TableCell>{patient.phone}</TableCell>
+                    <TableCell>{patient?.name}</TableCell>
+                    <TableCell>{patient?.email}</TableCell>
+                    <TableCell>{patient?.phone}</TableCell>
                     <TableCell>
                       <Dialog>
                         <DialogTrigger asChild>

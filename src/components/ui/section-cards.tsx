@@ -1,4 +1,7 @@
 "use client"
+// Section Card for Admin Main Dashboard
+// - Review [x]
+
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -9,19 +12,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useGetAppointmentsStatusQuery, useGetSummaryQuery } from "@/app/store/features/analysis/analysisApi";
+import { useGetSummaryQuery } from "@/app/store/features/analysis/analysisApi";
 import LoadingPills from "./loading";
-export function SectionCards() {
-  // Fetch summary and appointments data from backend
-  const { data: summary, isLoading: summaryLoading } = useGetSummaryQuery();
-  const { data: appointmentsStatus } = useGetAppointmentsStatusQuery();
 
-  // While loading, show placeholder or zero
+export function SectionCards() {
+  // --- Fetch summary and appointments data from backend
+  const { data: summary, isLoading: summaryLoading } = useGetSummaryQuery();
+
+  // --- stats for the cards 
   const stats = [
     {
       title: "Total Patients",
       value: summary?.patientsCount ?? 0,
-      change: ((summary?.patientsCount ?? 0) / 100), 
+      change: ((summary?.patientsCount ?? 0) / 100),
       trend: "up",
       description: "Total Patients Register",
       subtext: "Visitors for the last 6 months",
@@ -48,7 +51,7 @@ export function SectionCards() {
     {
       title: "Total Files",
       value: summary?.filesCount ?? 0,
-      change:((summary?.filesCount ?? 0) / 100),
+      change: ((summary?.filesCount ?? 0) / 100),
       trend: "up",
       description: "File uploads are growing",
       subtext: "Storage activity",
@@ -56,7 +59,7 @@ export function SectionCards() {
     },
   ];
 
-  if (summaryLoading) return <div><LoadingPills message="Loading Analysis"/></div>;
+  if (summaryLoading) return <div><LoadingPills message="Loading Analysis" /></div>;
 
   return (
     <div className="*:data-[slot=card]:bg-muted *:data-[slot=card]:rounded-md *:data-[slot=card]:border *:data-[slot=card]:shadow-none hover:bg-white/50 grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">

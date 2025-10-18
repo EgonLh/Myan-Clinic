@@ -1,5 +1,6 @@
 "use client"
-
+// ----- Chart-grids for analysis ----- //
+// - Review [x]
 import * as React from "react"
 import {
   useGetDoctorsByDepartmentQuery,
@@ -17,23 +18,26 @@ import {
   BarChart,
   Bar,
 } from "recharts"
+import LoadingPills from "./loading"
 
 export function ChartsGrid() {
+  // ----- Fetch data from API ----- //
   const { data: doctorsByDept, isLoading: loadingDoctors } = useGetDoctorsByDepartmentQuery()
   const { data: appointmentsPerDoctor, isLoading: loadingAppointments } =
     useGetAppointmentsPerDoctorQuery()
 
+  // ----- Loading State ----- //
   if (loadingDoctors || loadingAppointments) {
     return (
       <div className="flex justify-center items-center h-[200px] text-muted-foreground font-mono">
-        Loading charts...
+        <LoadingPills message="Loading Appointments Data..." />
       </div>
     )
   }
 
   return (
     <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 font-mono">
-      {/* 🩺 Doctors by Department — Vertical Bar Chart */}
+      {/* ----- Doctors by Department — Vertical Bar Chart ----- */}
       <Card className="bg-card border-dotted border-border shadow-none transition-all">
         <CardHeader>
           <CardTitle className="text-base sm:text-lg md:text-xl">
@@ -48,7 +52,7 @@ export function ChartsGrid() {
             <ChartContainer
               className="h-[250px] sm:h-[300px] md:h-[360px] w-full"
               config={{
-                count: { label: "Doctors", color: "hsl(var(--chart-1))" },
+                count: { label: "Doctors", color: "blue" },
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
@@ -73,9 +77,12 @@ export function ChartsGrid() {
                   <Tooltip content={<ChartTooltipContent />} />
                   <Bar
                     dataKey="count"
-                    fill="hsl(var(--chart-1))"
-                    radius={[4, 4, 0, 0]}
-                    barSize={70}
+                    fill="#8066e7ff"
+                    radius={[10, 10, 0, 0]}
+                    barSize={50}
+                    stroke="black" // border color
+                    strokeWidth={2} // border width
+                    strokeDasharray="12 2" // dotted effect
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -88,7 +95,7 @@ export function ChartsGrid() {
         </CardContent>
       </Card>
 
-      {/* 📊 Appointments per Doctor — Horizontal Bar Chart */}
+      {/* ----- Appointments per Doctor — Horizontal Bar Chart ----- */}
       <Card className="bg-card border-dotted border-border shadow-none transition-all">
         <CardHeader>
           <CardTitle className="text-base sm:text-lg md:text-xl">
@@ -125,15 +132,18 @@ export function ChartsGrid() {
                     type="category"
                     dataKey="doctorName"
                     stroke="hsl(var(--muted-foreground))"
-                    tick={{ fontSize: 10 }}
-                    width={100}
+                    tick={{ fontSize: 10, angle: -90, textAnchor: 'middle' }} 
+                    width={10}
                   />
                   <Tooltip content={<ChartTooltipContent />} />
                   <Bar
                     dataKey="appointmentsCount"
-                    fill="hsl(var(--chart-4))"
+                    fill="rgba(164, 221, 164, 1)"
                     radius={[4, 4, 4, 4]}
                     barSize={50}
+                    stroke="blue" // border color
+                    strokeWidth={2} // border width
+                    strokeDasharray="12 2" // dotted effect
                   />
                 </BarChart>
               </ResponsiveContainer>

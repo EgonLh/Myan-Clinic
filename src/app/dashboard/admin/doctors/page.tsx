@@ -1,5 +1,7 @@
 "use client"
 
+// ----- Doctor Dashboard for Managing Them ----- //
+// - Review [x]
 import * as React from "react"
 import { useGetDoctorsQuery, useCreateDoctorMutation } from "@/app/store/features/doctor/doctorApi"
 import { useGetUsersQuery, useUpdateUserMutation } from "@/app/store/features/users/userApi"
@@ -19,6 +21,7 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
   SheetFooter, SheetClose, SheetTrigger
 } from "@/components/ui/sheet"
+import LoadingPills from "@/components/ui/loading"
 
 export default function DoctorsPage() {
   // -------------------- Queries & Mutations --------------------
@@ -32,7 +35,6 @@ export default function DoctorsPage() {
   const [selectedDoctor, setSelectedDoctor] = React.useState<number | null>(null)
   const [searchText, setSearchText] = React.useState("")
   const [selectedDepartment, setSelectedDepartment] = React.useState<string>("All")
-
   const [addSheetOpen, setAddSheetOpen] = React.useState(false)
   const [newDoctorUserId, setNewDoctorUserId] = React.useState<number | null>(null)
   const [newDoctorType, setNewDoctorType] = React.useState<"Generalist" | "Specialist">("Generalist")
@@ -42,7 +44,7 @@ export default function DoctorsPage() {
   const [newDoctorIsActive, setNewDoctorIsActive] = React.useState(true)
 
   // -------------------- Loading & Error --------------------
-  if (isLoading) return <div>Loading doctors...</div>
+  if (isLoading) return <div><LoadingPills message="Loading Doctors..."/></div>
   if (isError || !doctors) return <div>Failed to load doctors</div>
 
   // -------------------- Filtered Doctors --------------------
@@ -57,10 +59,7 @@ export default function DoctorsPage() {
     if (!newDoctorUserId || !newDoctorDepartmentId) return alert("Please fill all required fields")
 
     try {
-      // Update user role to Doctor
       await updateUser({ id: newDoctorUserId, body: { role: "Doctor" } })
-
-      // Create doctor record
       await createDoctor({
         uid: Number(newDoctorUserId),
         type: newDoctorType,
@@ -84,12 +83,13 @@ export default function DoctorsPage() {
   }
 
   return (
-    <div className="flex relative">
-      <div className="flex-1 p-6">
+    <div className="flex flex-col md:flex-row gap-4 p-4 md:p-6 font-mono">
+      {/* -------------------- Main Content -------------------- */}
+      <div className="flex-1">
 
         {/* -------------------- Header -------------------- */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold font-mono">Managing Doctors</h1>
+        <div className="flex flex-col md:flex-row justify-between items-between md:items-center mb-6 gap-3">
+          <h1 className="text-2xl font-bold">Managing Doctors</h1>
 
           {/* Add Doctor Sheet Trigger */}
           <Sheet open={addSheetOpen} onOpenChange={setAddSheetOpen}>
@@ -97,24 +97,22 @@ export default function DoctorsPage() {
               <Button className="font-mono">Add Doctor</Button>
             </SheetTrigger>
 
-            <SheetContent side="right" className="w-full md:w-96 lg:w-[40vw] overflow-auto font-mono">
+            <SheetContent side="right" className="w-full sm:w-96 lg:w-[40vw] overflow-auto">
               <SheetHeader>
-                <SheetTitle className="text-lg font-bold">Add New Doctor</SheetTitle>
-                <SheetDescription className="text-sm text-gray-500">
-                  Fill all required fields
-                </SheetDescription>
+                <SheetTitle className="text-lg font-bold font-mono underline">Add New Doctor</SheetTitle>
+                <SheetDescription className="text-sm text-gray-500">Fill all required fields</SheetDescription>
               </SheetHeader>
 
               {/* -------------------- Form Fields -------------------- */}
-              <div className="p-4 flex flex-col gap-4">
-                {/* User Dropdown */}
+              <div className="p-4 flex font-mono flex-col gap-4">
+                {/* User */}
                 <div className="flex flex-col gap-1">
-                  <Label>User</Label>
-                  <Select
+                  <Label className="mb-1">Select User</Label>
+                  <Select 
                     value={newDoctorUserId?.toString() || ""}
                     onValueChange={(val) => setNewDoctorUserId(Number(val))}
                   >
-                    <SelectTrigger className="rounded-md border border-gray-300">
+                    <SelectTrigger className="rounded-md shadow-none w-full border border-gray-300">
                       <SelectValue placeholder="Select user" />
                     </SelectTrigger>
                     <SelectContent>
@@ -125,14 +123,14 @@ export default function DoctorsPage() {
                   </Select>
                 </div>
 
-                {/* Type Dropdown */}
+                {/* Type */}
                 <div className="flex flex-col gap-1">
-                  <Label>Type</Label>
+                  <Label className="mb-1">Type</Label>
                   <Select
                     value={newDoctorType}
                     onValueChange={(val) => setNewDoctorType(val as "Generalist" | "Specialist")}
                   >
-                    <SelectTrigger className="rounded-md border border-gray-300">
+                    <SelectTrigger className=" w-full shadow-none rounded-md border border-gray-300">
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -142,26 +140,26 @@ export default function DoctorsPage() {
                   </Select>
                 </div>
 
-                {/* Phone */}
-                <div className="flex flex-col gap-1">
-                  <Label>Phone</Label>
-                  <Input
-                    placeholder="Enter phone"
-                    value={newDoctorPhone}
-                    onChange={(e) => setNewDoctorPhone(e.target.value)}
-                    className="rounded-md border border-gray-300"
-                  />
-                </div>
-
-                {/* License */}
-                <div className="flex flex-col gap-1">
-                  <Label>License</Label>
-                  <Input
-                    placeholder="Enter license"
-                    value={newDoctorLicense}
-                    onChange={(e) => setNewDoctorLicense(e.target.value)}
-                    className="rounded-md border border-gray-300"
-                  />
+                {/* Phone & License */}
+                <div className="flex flex-col gap-1 md:flex-row md:gap-4">
+                  <div className="flex-1">
+                    <Label className="mb-1">Phone</Label>
+                    <Input
+                      placeholder="Enter phone"
+                      value={newDoctorPhone}
+                      onChange={(e) => setNewDoctorPhone(e.target.value)}
+                      className="rounded-md shadow-none border border-gray-300"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Label className="mb-1">License</Label>
+                    <Input
+                      placeholder="Enter license"
+                      value={newDoctorLicense}
+                      onChange={(e) => setNewDoctorLicense(e.target.value)}
+                      className="rounded-md shadow-none border border-gray-300"
+                    />
+                  </div>
                 </div>
 
                 {/* Department */}
@@ -182,7 +180,7 @@ export default function DoctorsPage() {
                   </Select>
                 </div>
 
-                {/* Active Checkbox */}
+                {/* Active */}
                 <div className="flex items-center gap-2">
                   <Checkbox
                     checked={newDoctorIsActive}
@@ -192,7 +190,7 @@ export default function DoctorsPage() {
                 </div>
               </div>
 
-              {/* -------------------- Footer Buttons -------------------- */}
+              {/* -------------------- Footer -------------------- */}
               <SheetFooter className="flex justify-end gap-2 mt-4">
                 <SheetClose asChild>
                   <Button variant="outline" onClick={handleAddDoctor}>Create</Button>
@@ -200,22 +198,21 @@ export default function DoctorsPage() {
               </SheetFooter>
             </SheetContent>
           </Sheet>
-
         </div>
 
         {/* -------------------- Filters -------------------- */}
-        <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
-          <div className="flex flex-col w-full md:w-1/2">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
+          <div className="flex-1 w-full">
             <Label className="mb-2">Search by Name</Label>
             <Input
               placeholder="Enter doctor name"
               value={searchText}
-              className="rounded-sm shadow-none"
+              className="rounded-sm shadow-none md:w-4/5"
               onChange={(e) => setSearchText(e.target.value)}
             />
           </div>
 
-          <div className="flex flex-col w-full md:w-1/3">
+          <div className="flex-1">
             <Label className="mb-2">Filter by Department</Label>
             <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
               <SelectTrigger className="rounded-sm shadow-none">
@@ -230,10 +227,10 @@ export default function DoctorsPage() {
         </div>
 
         {/* -------------------- Doctors Table -------------------- */}
-        <div className="overflow-x-auto rounded-lg border-dotted border border-gray-300 font-mono">
-          <Table className="min-w-full divide-y divide-gray-200 rounded-lg">
+        <div className="overflow-x-auto rounded-lg border-dotted border border-gray-300">
+          <Table className="min-w-full divide-y divide-gray-200">
             <TableHeader>
-              <TableRow className="bg-gray-50 rounded-lg">
+              <TableRow className="bg-gray-50">
                 <TableHead>Name</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Phone</TableHead>
@@ -252,9 +249,8 @@ export default function DoctorsPage() {
                   </TableCell>
                   <TableCell>{doctor.ph}</TableCell>
                   <TableCell>{doctor.department.name}</TableCell>
-                  <TableCell className="px-4 py-3">
-
-                    {/* -------------------- Doctor Details Drawer -------------------- */}
+                  <TableCell>
+                    {/* Doctor Details Drawer */}
                     <Sheet
                       open={selectedDoctor === doctor.id}
                       onOpenChange={(open) => setSelectedDoctor(open ? doctor.id : null)}
@@ -262,19 +258,16 @@ export default function DoctorsPage() {
                       <SheetTrigger asChild>
                         <Button size="sm" variant="outline">View Details</Button>
                       </SheetTrigger>
-
-                      <SheetContent side="right" className="w-full md:w-96 lg:w-[40vw] overflow-auto">
+                      <SheetContent side="right" className="w-full sm:w-96 lg:w-[40vw] overflow-auto">
                         <SheetHeader>
                           <SheetTitle>{doctor.user.name}</SheetTitle>
                           <SheetDescription className="border-b-dotted border-b mb-4 pb-2">
                             Doctor Receipt Details
                           </SheetDescription>
                         </SheetHeader>
-
                         <div className="p-4">
                           <DoctorDrawerForm doctor={doctor} callback={() => setSelectedDoctor(null)} />
                         </div>
-
                         <SheetFooter className="flex justify-end gap-2">
                           <SheetClose asChild>
                             <Button variant="outline">Close</Button>
@@ -282,7 +275,6 @@ export default function DoctorsPage() {
                         </SheetFooter>
                       </SheetContent>
                     </Sheet>
-
                   </TableCell>
                 </TableRow>
               ))}

@@ -1,5 +1,6 @@
 "use client"
-
+// ----- Overall Appointments ----- //
+// - Reviews [x]
 import * as React from "react"
 import { useGetAppointmentsQuery } from "@/app/store/features/appointment/appointmentApi"
 import { useGetDoctorsQuery } from "@/app/store/features/doctor/doctorApi"
@@ -22,9 +23,11 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import LoadingPills from "@/components/ui/loading"
 
 export default function AppointmentPage() {
+  // -------------------- Fetching Data --------------------
   const { data: appointmentsData, isLoading } = useGetAppointmentsQuery()
   const { data: doctorsData } = useGetDoctorsQuery()
 
+  // -------------------- Filters State --------------------
   const [filters, setFilters] = React.useState({
     patientName: "",
     doctorName: "",
@@ -34,7 +37,7 @@ export default function AppointmentPage() {
     date: "",
   })
 
-  // Department mapping
+  // -------------------- Map Departments --------------------
   const departmentMap = React.useMemo(() => {
     const map: Record<number, string> = {}
     doctorsData?.forEach((doc) => {
@@ -43,7 +46,7 @@ export default function AppointmentPage() {
     return map
   }, [doctorsData])
 
-  // Table data with filters
+  // -------------------- Table Data with Filters --------------------
   const tableData = React.useMemo(() => {
     let data = (appointmentsData ?? []).map((appt) => ({
       id: appt.id,
@@ -56,6 +59,7 @@ export default function AppointmentPage() {
       notes: appt.notes,
     }))
 
+    // Apply filters
     if (filters.patientName)
       data = data.filter(d => d.patientName.toLowerCase().includes(filters.patientName.toLowerCase()))
     if (filters.doctorName)
@@ -76,13 +80,15 @@ export default function AppointmentPage() {
     return data
   }, [appointmentsData, filters, departmentMap])
 
-  // Table state
+  // -------------------- React Table State --------------------
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
+  // -------------------- Columns Definition --------------------
   const columns: ColumnDef<any>[] = [
+    // Checkbox column for row selection
     {
       id: "select",
       header: ({ table }) => (
@@ -102,6 +108,7 @@ export default function AppointmentPage() {
         />
       ),
     },
+    // Patient column with dialog details
     {
       accessorKey: "patientName",
       header: "Patient",
@@ -119,22 +126,16 @@ export default function AppointmentPage() {
             <div className="mt-2 text-sm font-mono grid grid-cols-2 gap-y-1 gap-x-4">
               <div className="font-semibold">Patient:</div>
               <div>{row.original.patientName}</div>
-
               <div className="font-semibold">Doctor:</div>
               <div>{row.original.doctorName}</div>
-
               <div className="font-semibold">Department:</div>
               <div>{row.original.doctorDepartment}</div>
-
               <div className="font-semibold">Doctor Type:</div>
               <div>{row.original.doctorType}</div>
-
               <div className="font-semibold">Date:</div>
               <div>{row.original.date}</div>
-
               <div className="font-semibold">Status:</div>
               <div>{row.original.status}</div>
-
               <div className="font-semibold">Notes:</div>
               <div>{row.original.notes || "-"}</div>
             </div>
@@ -145,7 +146,6 @@ export default function AppointmentPage() {
             </div>
           </DialogContent>
         </Dialog>
-
       ),
     },
     { accessorKey: "doctorName", header: "Doctor" },
@@ -154,12 +154,13 @@ export default function AppointmentPage() {
     { accessorKey: "date", header: "Date" },
     { accessorKey: "status", header: "Status" },
     {
-      accessorKey: "notes", header: "Notes", cell: ({ row }) => (
-        <span className="font-mono text-xs">{row.original.notes || "-"}</span>
-      )
+      accessorKey: "notes",
+      header: "Notes",
+      cell: ({ row }) => <span className="font-mono text-xs">{row.original.notes || "-"}</span>,
     },
   ]
 
+  // -------------------- Initialize Table --------------------
   const table = useReactTable({
     data: tableData,
     columns,
@@ -173,12 +174,14 @@ export default function AppointmentPage() {
     getRowId: row => row.id.toString(),
   })
 
+  // -------------------- Loading State --------------------
   if (isLoading) return <LoadingPills message="Loading Appointments..." />
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
+      {/* -------------------- Filters -------------------- */}
       <div className="flex flex-col w-full border-dashed border p-4 rounded gap-5 shadow-none bg-white font-mono">
+        {/* First row of filters */}
         <div className="grid md:grid-cols-3 grid-cols-2 gap-4">
           <Input
             placeholder="Filter by patient"
@@ -209,6 +212,8 @@ export default function AppointmentPage() {
             </SelectContent>
           </Select>
         </div>
+
+        {/* Second row of filters */}
         <div className="grid md:grid-cols-3 grid-cols-2 gap-4">
           <Input
             placeholder="Filter by doctor"
@@ -246,7 +251,7 @@ export default function AppointmentPage() {
         </div>
       </div>
 
-      {/* Table */}
+      {/* -------------------- Table -------------------- */}
       <div className="overflow-auto rounded-lg border">
         <Table>
           <TableHeader>

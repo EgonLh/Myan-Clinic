@@ -1,5 +1,6 @@
 "use client"
-
+// ----- State Card Analysis ----- //
+// - Review [x]
 import { useGetSummaryQuery } from "@/app/store/features/analysis/analysisApi"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -10,15 +11,18 @@ import {
   CalendarDays,
   FileText,
 } from "lucide-react"
+import LoadingPills from "./loading"
 
 export function MetricsGrid() {
+  // ----- Fetch metrics summary from API ----- //
   const { data: summary, isLoading, isError } = useGetSummaryQuery()
 
+  // ----- Loading & Error States ----- //
   if (isLoading)
     return (
-      <p className="text-center text-sm text-muted-foreground font-mono">
-        Loading metrics...
-      </p>
+      <div className="text-center text-sm text-muted-foreground font-mono">
+        <LoadingPills message="Loading Metrics..."/>
+      </div>
     )
   if (isError || !summary)
     return (
@@ -27,7 +31,8 @@ export function MetricsGrid() {
       </p>
     )
 
-  // Simulate previous data or use real previous period data if available
+  // ----- Previous period data (simulated or fetched from backend) ----- //
+  // This is used to calculate trend/percentage change
   const prev = {
     patientsCount: summary.patientsCount * 0.95,
     doctorsCount: summary.doctorsCount * 0.97,
@@ -35,16 +40,18 @@ export function MetricsGrid() {
     filesCount: summary.filesCount * 0.96,
   }
 
-  // Helper to calculate % change dynamically
+  // ----- Helper function: Calculate % change and trend arrow ----- //
   const calcChange = (current: number, prev: number) => {
-    if (prev === 0) return { percent: 0, trend: "neutral" }
+    if (prev === 0) return { percent: 0, trend: "neutral" } // avoid divide by zero
     const diff = ((current - prev) / prev) * 100
     return {
-      percent: Math.abs(diff).toFixed(1) + "%",
-      trend: diff >= 0 ? "up" : "down",
+      percent: Math.abs(diff).toFixed(1) + "%", // format as percentage
+      trend: diff >= 0 ? "up" : "down", // determine arrow direction
     }
   }
 
+  // ----- Define metrics cards ----- //
+  // Each metric contains title, value, trend, icon, and description
   const metrics = [
     {
       title: "Total Patients",
@@ -79,41 +86,45 @@ export function MetricsGrid() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 font-mono">
       {metrics.map((metric) => {
-        const Icon = metric.icon
-        const isPositive = metric.trend === "up"
+        const Icon = metric.icon 
+        const isPositive = metric.trend === "up" 
 
         return (
           <Card
             key={metric.title}
-            className="border border-dotted rounded-sm bg-card shadow-none transition hover:border-muted-foreground/50"
+            className="border border-dotted rounded-sm bg-card shadow-none transition hover:border-muted-foreground/50 hover:border-dashed"
           >
+            {/* ----- Card Header: Title + Icon ----- */}
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs sm:text-sm text-muted-foreground">
                 {metric.title}
               </CardTitle>
               <Icon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
+
+            {/* ----- Card Content: Value + Trend + Description ----- */}
             <CardContent>
+              {/* Metric value */}
               <div className="text-xl sm:text-2xl font-bold text-foreground">
                 {metric.value.toLocaleString()}
               </div>
+
+              {/* Trend indicator */}
               <div className="flex items-center text-xs mt-1">
                 {isPositive ? (
                   <ArrowUpIcon className="h-3 w-3 text-green-500 mr-1" />
                 ) : (
                   <ArrowDownIcon className="h-3 w-3 text-red-500 mr-1" />
                 )}
-                <span
-                  className={
-                    isPositive ? "text-green-500" : "text-red-500"
-                  }
-                >
+                <span className={isPositive ? "text-green-500" : "text-red-500"}>
                   {metric.percent}
                 </span>
                 <span className="text-muted-foreground ml-1">
                   from last period
                 </span>
               </div>
+
+              {/* Metric description */}
               <p className="text-[11px] sm:text-xs text-muted-foreground mt-2">
                 {metric.description}
               </p>
