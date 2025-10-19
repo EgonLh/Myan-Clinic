@@ -31,8 +31,12 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { DialogTitle } from "@radix-ui/react-dialog"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "@/app/store/store"
+import { logout } from "@/app/store/features/auth/authSlice"
+import { redirect, useRouter } from "next/navigation"
+import LoadingPills from "../ui/loading"
+import { useHandleLogout } from "../core/func/Logout"
 
 // ----- Props -----
 interface NavbarProps {
@@ -53,9 +57,10 @@ const navigationItems = [
 export function Navbar({ activeTab, onTabChange }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const {user} = useSelector((state:RootState) => state.auth);
+  const handleLogout = useHandleLogout()
 
-  const handleLogout = () => {
-    console.log("Logging Out")
+  if (!user) {
+    return <LoadingPills message="Loading user data..." />
   }
   return (
     <header className="sticky flex justify-center top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -99,7 +104,7 @@ export function Navbar({ activeTab, onTabChange }: NavbarProps) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 shadow-none rounded">
                 <Avatar className="h-8 w-8 rounded">
-                  <AvatarFallback className="rounded ">{user?.role[0]}</AvatarFallback>
+                  <AvatarFallback className="rounded ">{user?.role?.[0] ?? "?"}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>

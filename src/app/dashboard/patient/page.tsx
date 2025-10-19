@@ -38,13 +38,13 @@ import { PatientStorage } from "@/components/patients/patient-storage"
 import { useGetStorageByPatientQuery } from "@/app/store/features/storage/storageApi"
 import { useGetAppointmentsByPatientQuery } from "@/app/store/features/appointment/appointmentApi"
 import { UserDialog } from "@/components/patients/patient-edit"
+import TokenChecker from "@/components/core/TokenChecker"
 
 export default function PatientDashboard() {
   // ----- STATE & HOOKS ----- //
   const [activeTab, setActiveTab] = useState("overview")
   const { user } = useSelector((state: RootState) => state.auth)
   const patientId = Number(user?.user_id)
-  const router = useRouter()
 
   // ----- DATA FETCHING ----- //
   if (!user) return <div><LoadingPills message="Data is Loading" /></div>
@@ -165,28 +165,20 @@ export default function PatientDashboard() {
                 </CardContent>
               </Card>
 
-              {/* ----- Payment Confirmation ----- */}
+              {/* ----- Token Confirmation ----- */}
               <Card className="rounded-sm p-3 m-0 shadow-none hover:bg-slate-300/[0.1] transition-all duration-300">
-                <CardContent className="p-0 space-y-1">
-                  <div className="flex justify-between items-center">
-                    <div className="bg-black rounded p-1 text-white">
-                      <Activity className="w-5 h-5" />
-                    </div>
-                    <p className="text-xs font-bold border rounded-lg p-1 px-2">{AppointmentConfirmed.length}</p>
-                  </div>
+                <CardContent className="p-0 ">
 
-                  <p className="text-xs font-medium text-muted-foreground mt-1">Payment Confirmation</p>
-                  <hr className="mt-1" />
+                  <div className="text-md hover:underline font-mono font-medium text-muted-foreground mt-1">Token Checker</div>
 
                   <div className="text-[10px] text-muted-foreground font-mono text-justify space-y-[2px]">
-                    <p>Appointments need payment confirmation via invoice upload. Once confirmed, status will update automatically.</p>
+                    <TokenChecker />
                   </div>
 
                   <p
-                    className="text-[10px] text-slate-300 font-medium underline cursor-pointer hover:text-primary/80"
-                    onClick={() => setActiveTab("appointments")}
+                    className="text-[10px] text-slate-300 font-medium text-center font-medium cursor-pointer hover:text-primary/80"
                   >
-                    View details
+                    To See The Current Token Number, Please Select The Date Above.
                   </p>
                 </CardContent>
               </Card>
@@ -288,13 +280,15 @@ export default function PatientDashboard() {
               <h2 className="text-2xl font-bold text-slate-600">
                 Welcome back,
               </h2>
-              <p className="text-muted-foreground font-mono text-xs">
-                Here's a quick summary and services we provide for your health , {user?.email}.
-              </p>
-              <UserDialog
-                userId={user?.id || 0}
-                trigger={<Button variant="outline">Edit User</Button>}
-              />
+              <div className="text-muted-foreground font-mono  text-justify mt-3">
+                Here's a quick summary and services we provide for your health  <br />
+                Manage your profile info here: {" "}
+                <UserDialog
+                  userId={user?.id || 0}
+                  trigger={<Button variant="link" className="font-mono text-xs p-0 text-slate-40">See Your Information</Button>}
+                />
+              </div>
+
             </div>
           </div>
         </div>

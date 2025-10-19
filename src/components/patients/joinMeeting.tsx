@@ -24,7 +24,7 @@ export function JoinMeeting({ patientId }: JoinNowProps) {
   const [updateStatus] = useUpdateAppointmentMutation()
   const [uploadInvoice] = useUploadInvoiceByAppointmentIdMutation()
   const [file, setFile] = useState<File | null>(null)
-  const [checkLogic, setCheckLogic] = useState(true);
+  const [checkLogic, setCheckLogic] = useState(false);
   const router = useRouter()
 
   // ----- loading / empty states ----- //
@@ -34,7 +34,7 @@ export function JoinMeeting({ patientId }: JoinNowProps) {
 
   // -----  get next upcoming appointment ----- //
   const upcomingAppointments = appointments
-    .filter((appt) => new Date(appt.date) >= new Date())
+    .filter((appt) => new Date(appt.date) >= new Date() && appt.status.toLowerCase() !== "done")
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
   const nextAppointment = upcomingAppointments[0]
@@ -54,6 +54,7 @@ export function JoinMeeting({ patientId }: JoinNowProps) {
   const DoneObj = { status: "Done" as "Done" }
   const pendingObj = { status: "Pending" as "Pending" }
 
+  console.log("Next Appointment:", nextAppointment)
   // -----  handle join meeting click ----- //
   const handleMeeting = async () => {
     try {

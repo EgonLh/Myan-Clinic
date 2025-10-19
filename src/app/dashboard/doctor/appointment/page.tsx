@@ -43,6 +43,8 @@ export default function AppointmentsPage() {
   // Redux selector for doctor data
   const doctorData = useSelector((state: RootState) => state.doctor?.data);
   const doctorId = doctorData?.id || "";
+  // --current-token--//
+
   const handleConfirmed = (app_id: number) => {
     if (!appointments) return;
 
@@ -104,6 +106,7 @@ export default function AppointmentsPage() {
   } = generalistView
       ? useGetAppointmentsQuery()
       : useGetAppointmentsByDoctorQuery(doctorId, { skip: !doctorId });
+ 
 
   // Loading state
   if (isLoading)
