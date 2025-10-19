@@ -1,23 +1,61 @@
 "use client"
-
+// ---- Component: MedicineIdentifier ----- //
+// - Review [x]
 import type React from "react"
 import { useState, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Upload, Camera, X, Loader2, Pill, AlertTriangle, CheckCircle2 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useUploadMedicineMutation } from "@/app/store/features/ai-services/appApi" // import your RTK mutation
+import { useUploadMedicineMutation } from "@/app/store/features/ai-services/appApi"
 
+// ----- Identification Result type ----- //
 interface IdentificationResult {
-  name: string
-  confidence: number
-  dosage: string
-  manufacturer: string
-  warnings: string[]
-  description: string
+  Medicine_Name: string
+  Composition: string
+  Uses: string
+  Side_effects: string
+  Image_URL: string
+  Manufacturer: string
+  Excellent_Review: number
+  Average_Review: number
+  Poor_Review: number
 }
 
+// ----- Convert any image type to PNG before uploading ----- //
+async function convertImageToPng(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => {
+      const img = new Image()
+      img.src = reader.result as string
+      img.onload = () => {
+        const canvas = document.createElement("canvas")
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext("2d")
+        if (!ctx) return reject("Canvas not supported")
+
+        ctx.drawImage(img, 0, 0)
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return reject("PNG conversion failed")
+            const pngFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", {
+              type: "image/png",
+            })
+            resolve(pngFile)
+          },
+          "image/png",
+          1.0
+        )
+      }
+      img.onerror = (err) => reject(err)
+    }
+    reader.onerror = (err) => reject(err)
+  })
+}
+
+// ----- Medicine Identifier Component ----- //
 export function MedicineIdentifier() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
@@ -27,42 +65,39 @@ export function MedicineIdentifier() {
 
   const [uploadMedicine, { isLoading: isUploading }] = useUploadMedicineMutation()
 
-  // Handle local preview
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // ----- Handle local preview + convert to PNG ----- //
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      setSelectedFile(file)
-      const reader = new FileReader()
-      reader.onload = (e) => setPreviewImage(e.target?.result as string)
-      reader.readAsDataURL(file)
-      setResult(null)
+      try {
+        const pngFile = await convertImageToPng(file)
+        setSelectedFile(pngFile)
+
+        const reader = new FileReader()
+        reader.onload = (e) => setPreviewImage(e.target?.result as string)
+        reader.readAsDataURL(pngFile)
+
+        setResult(null)
+      } catch (err) {
+        console.error("Failed to convert image:", err)
+      }
     }
   }
 
-  // Handle medicine identification
+  // ----- Handle medicine identification ----- //
   const handleAnalyze = async () => {
     if (!selectedFile) return
 
     setIsAnalyzing(true)
     try {
-      // Upload the file to backend
       const response = await uploadMedicine(selectedFile).unwrap()
-      console.log("Upload response:", response)
 
-      // Simulate result based on response or replace with actual backend data
-      setTimeout(() => {
-        setResult({
-          name: "Lisinopril",
-          confidence: 94,
-          dosage: "10mg",
-          manufacturer: "Lupin Pharmaceuticals",
-          warnings: ["Take with food", "May cause dizziness", "Monitor blood pressure"],
-          description: "ACE inhibitor used to treat high blood pressure and heart failure",
-        })
-        setIsAnalyzing(false)
-      }, 1000)
+      // ✅ Set result from response
+      setResult(response)
     } catch (err) {
       console.error("Upload failed:", err)
+      setResult(null)
+    } finally {
       setIsAnalyzing(false)
     }
   }
@@ -77,21 +112,34 @@ export function MedicineIdentifier() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-balance mb-2">Medicine Identifier</h2>
-        <p className="text-muted-foreground">
-          Upload a photo of your medication to identify it and get detailed information
+        <h2 className="text-lg font-bold mb-2 font-mono">Medicine Identifier</h2>
+        <p className="text-muted-foreground mb-4">
+          Upload a clear photo of your medication to identify it and get detailed information. Here’s an example of a
+          clear photo{" "}
+          <a
+            href="https://onemg.gumlet.io/l_watermark_346,w_480,h_480/a_ignore,w_480,h_480,c_fit,q_auto,f_auto/cropped/pn7apngctvrtweencwi1.jpg"
+            target="_blank"
+            className="underline text-blue-400"
+          >
+            (View Example)
+          </a>
+          .<br />
+          <span className="text-xs text-red-500">
+            Do not rely solely on this identification. Always meet a healthcare professional before taking any
+            medicine.
+          </span>
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Upload Section */}
-        <Card>
+        <Card className="border rounded font-mono shadow-none">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Camera className="w-5 h-5" />
               Upload Medicine Photo
             </CardTitle>
-            <CardDescription>Take a clear photo of your pill or medication packaging</CardDescription>
+            <CardDescription>Take a clear photo of your pill or packaging</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {!previewImage ? (
@@ -106,7 +154,9 @@ export function MedicineIdentifier() {
               </div>
             ) : (
               <div className="relative">
-                <img src={previewImage} alt="Selected medicine" className="w-full h-64 object-cover rounded-lg" />
+                {previewImage ? (
+                  <img src={previewImage} alt="Selected medicine" className="w-full h-64 object-cover rounded-lg" />
+                ) : null}
                 <Button variant="destructive" size="icon" className="absolute top-2 right-2" onClick={clearImage}>
                   <X className="w-4 h-4" />
                 </Button>
@@ -138,7 +188,7 @@ export function MedicineIdentifier() {
         </Card>
 
         {/* Results Section */}
-        <Card>
+        <Card className="border rounded font-mono shadow-none">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
@@ -165,53 +215,43 @@ export function MedicineIdentifier() {
             {result && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold">{result.name}</h3>
-                  <Badge
-                    variant={result.confidence > 90 ? "default" : "secondary"}
-                    className={cn(result.confidence > 90 && "bg-green-100 text-green-800 border-green-200")}
-                  >
-                    {result.confidence}% confident
-                  </Badge>
+                  <h3 className="text-xl font-bold">{result.Medicine_Name}</h3>
                 </div>
+
+                <img
+                  src={result.Image_URL}
+                  alt={result.Medicine_Name}
+                  className="w-full h-56 object-cover rounded-lg border"
+                />
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Dosage</p>
-                    <p className="font-medium">{result.dosage}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Composition</p>
+                    <p className="font-medium">{result.Composition}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Manufacturer</p>
-                    <p className="font-medium">{result.manufacturer}</p>
+                    <p className="font-medium">{result.Manufacturer}</p>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">Description</p>
-                  <p className="text-sm">{result.description}</p>
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Uses</p>
+                  <p className="text-sm">{result.Uses}</p>
                 </div>
 
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4" />
-                    Important Warnings
+                    Side Effects
                   </p>
-                  <div className="space-y-2">
-                    {result.warnings.map((warning, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start gap-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg"
-                      >
-                        <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-yellow-800">{warning}</p>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="text-sm text-yellow-800">{result.Side_effects}</p>
                 </div>
 
                 <div className="pt-4 border-t">
                   <p className="text-xs text-muted-foreground">
                     <strong>Disclaimer:</strong> This identification is for informational purposes only. Always consult
-                    with your healthcare provider before taking any medication.
+                    a healthcare professional before taking any medication.
                   </p>
                 </div>
               </div>

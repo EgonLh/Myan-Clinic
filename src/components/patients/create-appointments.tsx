@@ -1,5 +1,6 @@
 "use client";
-
+// ----- Component: CreateAppointment ----- //
+// - Review [x]
 import { useState } from "react";
 import {
   Card,
@@ -15,56 +16,63 @@ import { useCreateAppointmentMutation } from "@/app/store/features/appointment/a
 import { CreateAppointmentRequest } from "@/types/appointment.type";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/store/store";
-import { ScrollArea } from "../ui/scroll-area";
-import { Avatar } from "@radix-ui/react-avatar";
-import { AvatarFallback } from "../ui/avatar";
 import ChatBotBox from "./chatbot";
 
 export default function CreateAppointment() {
+  // ----- Form State ----- //
   const [form, setForm] = useState({
     date: "",
     notes: "",
     description: "",
   });
 
+  // ----- Get logged-in patient ID from Redux ----- //
   const patient_id = useSelector(
     (state: RootState) => state?.auth?.user?.user_id
   );
 
+  // ----- API Mutation ----- //
   const [createAppointment] = useCreateAppointmentMutation();
 
+  // ----- Handle Form Submission ----- //
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validation: ensure date is selected
     if (!form.date) {
-      toast.error("❌ Please select a date for the appointment.");
+      toast.error(" Please select a date for the appointment.");
       return;
     }
 
+    // Set default time to 8:00 AM
     const isoDateObj = new Date(form.date);
-    isoDateObj.setHours(0, 0, 0, 0);
+    isoDateObj.setHours(8, 0, 0, 0);
     const isoDate = isoDateObj.toISOString();
 
+    // Prepare payload for API
     const payload: CreateAppointmentRequest = {
       patientId: Number(patient_id),
       date: isoDate,
       status: "not_started",
       duration: 1,
-      notes: form.notes || "Diagnosis",
+      notes: form.notes + " - Diagnosis",
       costs: 10000,
       description: form.description,
     };
 
     try {
+      // Call API to create appointment
       await createAppointment(payload);
       toast.success("✅ Appointment successfully created!");
+      // Reset form
       setForm({ date: "", notes: "", description: "" });
     } catch (err) {
-      toast.error("❌ Failed to create appointment. Try again!");
+      toast.error(" Failed to create appointment. Try again!");
       console.error(err);
     }
   };
 
+  // ----- Handle Form Input Changes ----- //
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -73,21 +81,27 @@ export default function CreateAppointment() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col lg:flex-row gap-6 p-4">
-      {/* Appointment Form */}
-      <main className="flex-1 max-w-3xl">
-        <h1 className="text-2xl font-bold mb-2">Create Appointment</h1>
-        <p className="text-muted-foreground text-sm mb-6">
-          Schedule your appointment (date only).
-        </p>
+    <div className="min-h-fit grid xl:grid-cols-2 grid-cols-1   flex flex-col lg:flex-row gap-5">
 
-        <Card className="rounded-sm border shadow-none">
-          <CardHeader>
-            <CardTitle className="underline font-mono">Appointment Details</CardTitle>
+      {/* ----- Chatbot Section ----- */}
+      <ChatBotBox />
+
+      {/* ----- Appointment Form Section ----- */}
+      <main className="flex-1 w-full order-0">
+
+
+        <Card className="rounded border shadow-none">
+          <CardHeader className="mx-5 p-1">
+            <CardTitle className=" border-b-2 pb-3 border-dashed font-mono hover:underline hover:decoration-wavy underline-offset-3 ">Create A Diagnosis Appointment</CardTitle>
+            <p className="text-muted-foreground indent-8 text-sm  text-justify tracking-wide">
+              Create your appointment for Diagnosis with our medical professionals.
+              After submission, our team will review and confirm your appointment. The professional will assign to the specialist.
+            </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Date */}
+
+              {/* ----- Appointment Date Input ----- */}
               <div>
                 <label className="text-sm font-medium text-muted-foreground mb-1 block">
                   Appointment Date
@@ -97,11 +111,12 @@ export default function CreateAppointment() {
                   name="date"
                   value={form.date}
                   onChange={handleChange}
+                  className="shadow-none font-mono"
                   required
                 />
               </div>
 
-              {/* Description */}
+              {/* ----- Description Input ----- */}
               <div>
                 <label className="text-sm font-medium text-muted-foreground mb-1 block">
                   Description
@@ -114,7 +129,7 @@ export default function CreateAppointment() {
                 />
               </div>
 
-              {/* Appointment Type */}
+              {/* ----- Appointment Type Select ----- */}
               <div>
                 <label className="text-sm font-medium mb-1 block text-muted-foreground">
                   Appointment Type
@@ -130,17 +145,16 @@ export default function CreateAppointment() {
                   <option value="Offline">Offline</option>
                 </select>
               </div>
-
-              <Button type="submit" className="w-full md:w-fit">
+              {/* ----- Submit Button ----- */}
+              <Button type="submit" className="w-full mt-3 md:w-fit">
                 Save Appointment
               </Button>
+
             </form>
           </CardContent>
         </Card>
       </main>
 
-      {/* Chat Section */}
-      <ChatBotBox />
     </div>
   );
 }

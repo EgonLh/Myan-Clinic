@@ -14,18 +14,18 @@ export default function AdminHelpPage() {
 
       {/* -------------------- Sidebar / Navigation -------------------- */}
       <aside className="w-full md:w-1/4 bg-white    border-r-1 border-dashed border-gray-300 p-4 space-y-4">
-        <h2 className="text-lg font-bold mb-2">Admin Dashboard Manual</h2>
+        <h2 className="text-lg font-bold mb-2 underline">Manual</h2>
         <ul className="space-y-2 text-sm">
-          <li><a href="#overview" className="hover:text-blue-600">Overview</a></li>
-          <li><a href="#users" className="hover:text-blue-600">Users Management</a></li>
-          <li><a href="#appointments" className="hover:text-blue-600">Appointments</a></li>
-          <li><a href="#analytics" className="hover:text-blue-600">Analytics & Reports</a></li>
-          <li><a href="#doctors" className="hover:text-blue-600">Doctors Management</a></li>
-          <li><a href="#patients" className="hover:text-blue-600">Patients Management</a></li>
-          <li><a href="#patient-history" className="hover:text-blue-600">Patient History</a></li>
-          <li><a href="#storages" className="hover:text-blue-600">Storage & Documents</a></li>
-          <li><a href="#settings" className="hover:text-blue-600">Settings</a></li>
-          <li><a href="#help" className="hover:text-blue-600">Help & Support</a></li>
+          <li className="hover:my-4 transitions-all duration-300 hover:underline my-3 "><a href="#overview" className="hover:text-blue-600">Overview</a></li>
+          <li className="hover:my-4 transitions-all duration-300 hover:underline my-3 "><a href="#users" className="hover:text-blue-600">Users Management</a></li>
+          <li className="hover:my-4 transitions-all duration-300 hover:underline my-3 "><a href="#appointments" className="hover:text-blue-600">Appointments</a></li>
+          <li className="hover:my-4 transitions-all duration-300 hover:underline my-3 "><a href="#analytics" className="hover:text-blue-600">Analytics & Reports</a></li>
+          <li className="hover:my-4 transitions-all duration-300 hover:underline my-3 "><a href="#doctors" className="hover:text-blue-600">Doctors Management</a></li>
+          <li className="hover:my-4 transitions-all duration-300 hover:underline my-3 "><a href="#patients" className="hover:text-blue-600">Patients Management</a></li>
+          <li className="hover:my-4 transitions-all duration-300 hover:underline my-3 "><a href="#patient-history" className="hover:text-blue-600">Patient History</a></li>
+          <li className="hover:my-4 transitions-all duration-300 hover:underline my-3 "><a href="#storages" className="hover:text-blue-600">Storage & Documents</a></li>
+          <li className="hover:my-4 transitions-all duration-300 hover:underline my-3 "><a href="#settings" className="hover:text-blue-600">Settings</a></li>
+          <li className="hover:my-4 transitions-all duration-300 hover:underline my-3 "><a href="#help" className="hover:text-blue-600">Help & Support</a></li>
         </ul>
       </aside>
 

@@ -29,14 +29,11 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Syringe } from "lucide-react"
+import { useSelector } from "react-redux"
+import { RootState } from "@/app/store/store"
 
 // -------------------- Sidebar Data --------------------
 const data = {
-  user: {
-    name: "admin",
-    email: "admin@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     { title: "Dashboard", url: "/dashboard", icon: IconDashboard },
     { title: "Analytics", url: "/dashboard/admin/analytics", icon: IconChartBar },
@@ -57,6 +54,15 @@ const data = {
 
 // -------------------- AppSidebar Component --------------------
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const {user} = useSelector((state: RootState) => state.auth);
+
+  // ---- Data Manipulation ---- //
+  const currentUser = {
+    role: user?.role || "Guest",
+    email: user?.email || "N/A",
+    avatar: "https://i.pinimg.com/1200x/23/2a/07/232a073eb5e7601860fb2477ffd3146e.jpg",
+  }
+  console.log("Current User in Sidebar:", currentUser);
   return (
     <Sidebar collapsible="offcanvas" {...props} className="">
       {/* -------------------- Sidebar Header -------------------- */}
@@ -93,7 +99,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       {/* -------------------- Sidebar Footer -------------------- */}
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={currentUser} />
       </SidebarFooter>
     </Sidebar>
   )

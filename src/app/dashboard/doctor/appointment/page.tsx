@@ -31,7 +31,6 @@ import LoadingPills from "@/components/ui/loading";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { success } from "zod";
 
 export default function AppointmentsPage() {
   // State for filters and selected appointment
@@ -44,14 +43,50 @@ export default function AppointmentsPage() {
   // Redux selector for doctor data
   const doctorData = useSelector((state: RootState) => state.doctor?.data);
   const doctorId = doctorData?.id || "";
-  const handleConfirmed = (app_id: any) => {
-    console.log("work")
-    const confirmObj = {
-      status: "Confirmed" as "Confirmed"
+  const handleConfirmed = (app_id: number) => {
+    if (!appointments) return;
+
+    // Get the appointment to confirm
+    const appointmentToConfirm = appointments.find((a) => a.id === app_id);
+    if (!appointmentToConfirm) return;
+
+    // Prepare updated notes
+    let updatedNotes = appointmentToConfirm.notes || "";
+
+    // Check if note includes 'diagnosis' (case-insensitive)
+    if (updatedNotes.toLowerCase().includes("diagnosis")) {
+      // Get all appointments for the same day
+      const appointmentDate = new Date(appointmentToConfirm.date);
+      const sameDayAppointments = appointments
+        .filter((a) => {
+          const d = new Date(a.date);
+          return (
+            d.getFullYear() === appointmentDate.getFullYear() &&
+            d.getMonth() === appointmentDate.getMonth() &&
+            d.getDate() === appointmentDate.getDate()
+          );
+        })
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+      // Determine token number based on order
+      const tokenNumber = sameDayAppointments.findIndex((a) => a.id === app_id) + 1;
+
+      // Append token
+      updatedNotes += ` | Token #${tokenNumber}`;
     }
+
+    // Prepare updated object
+    const confirmObj = {
+      status: "Confirmed" as "Confirmed",
+      notes: updatedNotes,
+    };
+
+    // Update appointment
     updateAppointment({ id: Number(app_id), body: confirmObj });
-    setSelectedAppointment(null)
-  }
+    setSelectedAppointment(null);
+  };
+
+
   // Loading doctor data
   if (!doctorId || !doctorData) {
     return (
@@ -185,7 +220,7 @@ export default function AppointmentsPage() {
             <div className="sm:flex sm:justify-between mt-2 pt-3">
               {/* Status Buttons */}
               <div className="grid grid-cols-4 sm:flex  gap-2 ">
-                {["all","not_started","pending", "cancelled","confirmed","done"].map((status) => (
+                {["all", "not_started", "pending", "cancelled", "confirmed", "done"].map((status) => (
                   <Button
                     key={status}
                     size="sm"
@@ -319,7 +354,7 @@ export default function AppointmentsPage() {
 
             <DialogFooter>
               <Button onClick={() => setSelectedAppointment(null)}>Close</Button>
-              {(selectedAppointment?.status)?.toLowerCase() == "pending" ? <Button onClick={() => handleConfirmed(selectedAppointment.id)}>Confirm</Button> : ""}
+              {(selectedAppointment?.status)?.toLowerCase() == "pending" && selectedAppointment?.doctorId == doctorId ? <Button onClick={() => handleConfirmed(selectedAppointment.id)}>Confirm</Button> : ""}
             </DialogFooter>
           </DialogContent>
         </Dialog>
