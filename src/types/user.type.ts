@@ -27,6 +27,7 @@ export interface CreateUserRequest {
   email: string
   password: string
   role: "Patient" | "Doctor" | "Root"
+  rating:number
 }
 
 export interface UpdateUserRequest extends Partial<Omit<CreateUserRequest, "password">> {

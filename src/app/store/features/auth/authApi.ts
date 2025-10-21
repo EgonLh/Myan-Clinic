@@ -19,7 +19,7 @@ export interface RegisterRequest{
 }
 
 export interface RegisterResponse{
-  accessToke:string,
+  accessToken:string,
   user:{
     id: number; email: string; role: string
   }

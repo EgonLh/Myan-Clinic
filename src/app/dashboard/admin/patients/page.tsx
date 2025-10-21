@@ -183,22 +183,7 @@ export default function PatientsPage() {
                                   <Button type="submit" variant="ghost" size={"sm"} disabled={isSubmitting} className="border text-xs flex-1 rounded-sm">
                                     Update
                                   </Button>
-                                  <Button
-                                    type="button"
-                                    size={"sm"}
-                                    variant="ghost"
-                                    className="flex-1 border rounded-sm text-xs"
-                                    onClick={async () => {
-                                      try {
-                                        await deletePatient(selected.id)
-                                        setSelectedPatient(null)
-                                      } catch (err) {
-                                        console.error(err)
-                                      }
-                                    }}
-                                  >
-                                    Delete
-                                  </Button>
+                                 
                                   <SheetClose asChild>
                                     <Button variant="ghost" size={"sm"} className="flex-1 border text-xs rounded-sm">Close</Button>
                                   </SheetClose>

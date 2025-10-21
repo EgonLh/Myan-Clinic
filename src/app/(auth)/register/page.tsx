@@ -47,10 +47,9 @@ export default function RegisterPage() {
     console.log("Registration attempt:", values)
     try{
       const result = await register(values).unwrap();
-      // dispatch(setCredentials(result));
+      dispatch(setCredentials({ user: result.user, token: result?.accessToken }));
       console.log("Registration successful:", result);
       
-      // later to update
       redirect('/login');
     } catch (error) {
       console.error("Registration failed:", error);

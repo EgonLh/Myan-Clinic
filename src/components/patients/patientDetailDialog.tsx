@@ -16,7 +16,6 @@ export default function PatientDetailDialog({
   const [isEditMode, setIsEditMode] = useState(false);
   const [condition, setCondition] = useState(patient.condition || "");
   const [updatePatient, { isLoading: isUpdating }] = useUpdatePatientMutation();
-
   // 🔹 Upload states
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadLog, setUploadLog] = useState("");

@@ -39,6 +39,7 @@ import { useGetStorageByPatientQuery } from "@/app/store/features/storage/storag
 import { useGetAppointmentsByPatientQuery } from "@/app/store/features/appointment/appointmentApi"
 import { UserDialog } from "@/components/patients/patient-edit"
 import TokenChecker from "@/components/core/TokenChecker"
+import PatientSetupForm from "@/components/patients/patient-setup"
 
 export default function PatientDashboard() {
   // ----- STATE & HOOKS ----- //
@@ -46,18 +47,26 @@ export default function PatientDashboard() {
   const { user } = useSelector((state: RootState) => state.auth)
   const patientId = Number(user?.user_id)
 
+  console.log("Current user:",user)
   // ----- DATA FETCHING ----- //
   if (!user) return <div><LoadingPills message="Data is Loading" /></div>
 
+  // ----- Checking Patient_id ----- //
+  if (!(user?.user_id) && (user)) return <div>
+    <PatientSetupForm id = {user?.id} />
+  </div>
   const { data: appointments = [] } = useGetAppointmentsByPatientQuery(patientId)
   const { data: storages = [] } = useGetStorageByPatientQuery(patientId)
 
   //----- CALCULATIONS  ----- //
 
   // Find the next upcoming appointment (sorted by soonest date)
-  const nextAppointment = appointments
-    .filter(a => new Date(a.date) >= new Date())
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0]
+  const now = new Date()
+
+const nextAppointment = appointments
+  .filter(a => new Date(a.date).getTime() >= now.getTime()) // use timestamp comparison
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0]
+
 
   // Appointments needing payment confirmation
   const AppointmentConfirmed = appointments.filter(a => (a.status)?.toLowerCase() === "pending")

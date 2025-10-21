@@ -44,9 +44,9 @@ export default function CreateAppointment() {
       return;
     }
 
-    // Set default time to 8:00 AM
+    // Set default time to 12:00 AM
     const isoDateObj = new Date(form.date);
-    isoDateObj.setHours(8, 0, 0, 0);
+    isoDateObj.setHours(23, 0, 0, 0);
     const isoDate = isoDateObj.toISOString();
 
     // Prepare payload for API
