@@ -1,5 +1,6 @@
 "use client"
-
+// ----- Hero Page ----- //
+// - Review [x]
 import { Button } from "@/components/ui/button"
 import { Star } from "lucide-react"
 import Link from "next/link"

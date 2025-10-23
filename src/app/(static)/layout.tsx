@@ -1,3 +1,5 @@
+// ----- Layout for Static Pages ----- //
+// - Review [x]
 import { Footer } from '@/components/core/Footer';
 import { NavigationBar } from '@/components/core/Navigation';
 import React from 'react';

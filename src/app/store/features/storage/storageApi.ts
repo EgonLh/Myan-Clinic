@@ -4,7 +4,7 @@ import { IStorage, CreateStorageRequest, UpdateStorageRequest } from "@/types/st
 export const storageApi = createApi({
   reducerPath: "storageApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as any).auth?.token;
       if (token) headers.set("authorization", `Bearer ${token}`);

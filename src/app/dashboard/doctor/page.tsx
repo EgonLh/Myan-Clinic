@@ -11,7 +11,6 @@ export default function HomePage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
-
   // fetch user data based on doc query 
   const { data, isLoading, isError, error } = useGetUserByIdQuery(Number(user?.id) ?? 0, {
     skip: !user?.id,

@@ -5,7 +5,7 @@ import { CreateDepartmentRequest, UpdateDepartmentRequest, Department } from '@/
 export const departmentApi = createApi({
   reducerPath: 'departmentApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:3000', // your backend base URL
+    baseUrl: process.env.NEXT_PUBLIC_API_URL, 
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as any).auth.token; // assuming you store JWT in auth slice
       if (token) {

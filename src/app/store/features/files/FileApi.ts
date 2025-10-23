@@ -4,7 +4,7 @@ import { IFile, CreateFileRequest, UpdateFileRequest } from "@/types/file.type"
 export const fileApi = createApi({
   reducerPath: "fileApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as any).auth?.token
       if (token) headers.set("authorization", `Bearer ${token}`)

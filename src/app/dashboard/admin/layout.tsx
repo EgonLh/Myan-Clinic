@@ -1,3 +1,4 @@
+"use client"
 // ----- Admin Dashboard (only) Layout ----- //
 // - Review [x]
 import {
@@ -6,12 +7,15 @@ import {
 } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/ui/app-sidebar"
 import { SiteHeader } from "@/components/ui/site-header"
+import { useAuthGuard } from "@/hooks/useAuthGuard"
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   // ----- Admin Main Layout ----- //
+  useAuthGuard()
+
   return (
     <div className=" flex  w-full  justify-center  ">
       <SidebarProvider

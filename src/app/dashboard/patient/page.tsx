@@ -40,6 +40,7 @@ import { useGetAppointmentsByPatientQuery } from "@/app/store/features/appointme
 import { UserDialog } from "@/components/patients/patient-edit"
 import TokenChecker from "@/components/core/TokenChecker"
 import PatientSetupForm from "@/components/patients/patient-setup"
+import { useAuthGuard } from "@/hooks/useAuthGuard"
 
 export default function PatientDashboard() {
   // ----- STATE & HOOKS ----- //
@@ -47,6 +48,8 @@ export default function PatientDashboard() {
   const { user } = useSelector((state: RootState) => state.auth)
   const patientId = Number(user?.user_id)
 
+  // ---- AUTH GUARD ----- //
+  useAuthGuard()
   console.log("Current user:",user)
   // ----- DATA FETCHING ----- //
   if (!user) return <div><LoadingPills message="Data is Loading" /></div>
@@ -149,7 +152,7 @@ const nextAppointment = appointments
                     <div className="bg-black rounded p-1 text-white">
                       <FileText className="w-5 h-5" />
                     </div>
-                    <p className="text-xs font-bold border rounded-lg p-1 px-2">{storages.length}</p>
+                    <p className="text-xs font-bold border rounded-lg p-1 px-2">{storages.map(s => s.files.length).reduce((a, b) => a + b, 0)}</p>
                   </div>
 
                   <p className="text-xs font-medium text-muted-foreground mt-1">Storage Items</p>

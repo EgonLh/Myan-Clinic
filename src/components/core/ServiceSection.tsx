@@ -1,5 +1,6 @@
 "use client"
-
+// ----- Service Section Component ----- //
+// - Review [x]
 import { useState } from "react"
 
 import { Activity, Heart, FileText, Calendar, Users, Stethoscope, Pill } from "lucide-react";
@@ -10,7 +11,7 @@ const servicesData = {
   "Patient Services": [
     {
       title: "Online Appointments",
-      description: "Schedule, reschedule, or cancel appointments with doctors seamlessly through our online platform, saving time and avoiding queues.",
+      description: "Schedule, confirm, or cancel appointments with doctors seamlessly through our online platform, saving time and avoiding queues.",
       icon: Calendar,
     },
     {
@@ -25,7 +26,7 @@ const servicesData = {
     },
     {
       title: "Patient Monitoring",
-      description: "Track your health parameters, receive reminders for medications, and monitor your wellness goals directly through the platform.",
+      description: "Track your health status and monitor your wellness goals directly through the platform.",
       icon: Activity,
     },
   ],
