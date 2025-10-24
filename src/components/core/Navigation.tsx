@@ -33,7 +33,7 @@ const navConfig: NavItem[] = [
       {
         title: "Monitoring",
         href: "/login",
-        description: "Monitor your health metrics and get insights.",
+        description: "Monitor your health metrics and get insights Through Assignments Feedback.",
       },
       {
         title: "Consultation",
@@ -41,14 +41,15 @@ const navConfig: NavItem[] = [
         description: "Get online consultations from healthcare professionals.",
       },
     ],
+    href: "/login"
   },
   {
     title: "Features",
     children: [
       {
-        title: "Payments & Billing",
+        title: "Payments Transactions",
         href: "/services",
-        description: "Easy and secure payments with analytics support.",
+        description: "Easy and secure payments with a wide range of options.",
       },
       {
         title: "Storages",
@@ -58,7 +59,7 @@ const navConfig: NavItem[] = [
       {
         title: "Reports",
         href: "/services",
-        description: "Download test results and history in multiple formats.",
+        description: "Download and view detailed health reports based on your appointments.",
       },
       {
         title: "Support",
@@ -66,11 +67,12 @@ const navConfig: NavItem[] = [
         description: "24/7 technical and medical support.",
       },
     ],
+    href: "/services",
   },
   { title: "About Us", href: "/about" },
   { title: "FAQ", href: "/#FAQ" },
 ]
-
+// mobile Navigation 
 
 export function NavigationBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)

@@ -24,21 +24,21 @@ const services = [
     icon: "💻",
   },
   {
-    title: "Lab Reports",
+    title: "Reports Storage",
     description: "Get your lab tests done and receive results digitally.",
     features: ["Digital Reports", "Fast Processing", "Doctor Insights"],
     icon: "🧪",
   },
   {
-    title: "Pharmacy Services",
-    description: "Order medicines online and get home delivery.",
-    features: ["Prescription Upload", "Fast Delivery", "Secure Payment"],
+    title: "RAG chatbot for Healthcare",
+    description: "Chat with our AI-powered health assistant for quick medical advice.",
+    features: ["AI-Powered Responses", "Fast Response Time"],
     icon: "💊",
   },
   {
-    title: "Health Tips & Resources",
-    description: "Access health guides, articles, and preventive care tips.",
-    features: ["Wellness Articles", "Doctor Advice", "Community Resources"],
+    title: "OCR for Medicines ",
+    description: "Extract text from images of prescriptions and medicine labels.",
+    features: ["Text Recognition", "Data Extraction", "Prescription Management"],
     icon: "📖",
   },
 ]

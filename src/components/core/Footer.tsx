@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Youtube } from "lucide-react"
+import Link from "next/link"
 
 export function Footer() {
   return (
@@ -70,19 +71,29 @@ export function Footer() {
 
   <div className="flex gap-2">
     <Button variant="ghost" size="icon" className="h-10 w-10">
-      <Facebook className="h-5 w-5" />
+      <Link href="https://www.facebook.com/myanclinic" target="_blank" rel="noopener noreferrer">
+        <Facebook className="h-5 w-5" />
+      </Link>
     </Button>
     <Button variant="ghost" size="icon" className="h-10 w-10">
-      <Twitter className="h-5 w-5" />
+      <Link href="https://twitter.com/myanclinic" target="_blank" rel="noopener noreferrer">
+        <Twitter className="h-5 w-5" />
+      </Link>
     </Button>
     <Button variant="ghost" size="icon" className="h-10 w-10">
-      <Instagram className="h-5 w-5" />
+      <Link href="https://www.instagram.com/myanclinic" target="_blank" rel="noopener noreferrer">
+        <Instagram className="h-5 w-5" />
+      </Link>
     </Button>
     <Button variant="ghost" size="icon" className="h-10 w-10">
-      <Linkedin className="h-5 w-5" />
+      <Link href="https://www.linkedin.com/company/myanclinic" target="_blank" rel="noopener noreferrer">
+        <Linkedin className="h-5 w-5" />
+      </Link>
     </Button>
     <Button variant="ghost" size="icon" className="h-10 w-10">
-      <Youtube className="h-5 w-5" />
+      <Link href="https://www.youtube.com/myanclinic" target="_blank" rel="noopener noreferrer">
+        <Youtube className="h-5 w-5" />
+      </Link>
     </Button>
   </div>
 

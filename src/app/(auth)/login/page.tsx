@@ -228,14 +228,14 @@ export default function LoginPage() {
                           >
                             I agree to the{" "}
                             <Link
-                              href="/terms"
+                              href="/terms-and-conditions"
                               className="text-purple-500 hover:underline"
                             >
                               Terms & Conditions
                             </Link>{" "}
                             and{" "}
                             <Link
-                              href="/privacy"
+                              href="/privacy-policy"
                               className="text-purple-500 hover:underline"
                             >
                               Privacy Policy
