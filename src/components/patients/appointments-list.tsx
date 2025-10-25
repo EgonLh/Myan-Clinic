@@ -155,7 +155,7 @@ export function AppointmentsList({ patientId }: AppointmentsListProps) {
                         </div>
 
                         {/* Notes */}
-                        <div className="flex font-normal hover:tracking-wide transition-all duration-300 items-center gap-1 text-sm text-slate-400">
+                        <div className="flex font-normal text-justify hover:tracking-wide transition-all duration-300 items-center w-full gap-1 text-sm text-slate-400">
                           {appointment.notes}
                         </div>
                       </div>

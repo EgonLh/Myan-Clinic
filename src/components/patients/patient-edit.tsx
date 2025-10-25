@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select"
 import { useGetUserByIdQuery, useUpdateUserMutation } from "@/app/store/features/users/userApi"
 import { useUpdatePatientMutation } from "@/app/store/features/patient/patientApi"
+import bcrypt from "bcryptjs"
 
 // ----- Component Props ----- //
 interface UserDialogProps {
@@ -42,6 +43,7 @@ export function UserDialog({ userId, trigger }: UserDialogProps) {
     status: "Active",
     email: "",
     username: "",
+    password: "",
   })
 
   // ----- RTK API Hooks ----- //
@@ -62,8 +64,8 @@ export function UserDialog({ userId, trigger }: UserDialogProps) {
           user.gender === "female"
             ? "F"
             : user.gender === "other"
-            ? "other"
-            : "M",
+              ? "other"
+              : "M",
         status: user.status || "Active",
         email: user.email || "",
         username: user.username || "",
@@ -73,12 +75,17 @@ export function UserDialog({ userId, trigger }: UserDialogProps) {
 
   // ----- Handle Form Submission ----- //
   const handleSubmit = async () => {
+    let hashedPassword
+    if (form.password) {
+      hashedPassword = bcrypt.hashSync(form.password, 10)
+    }
     const updatedUserBody = {
       name: form.name,
       email: form.email,
       username: form.username,
       status: form.status,
       gender: form.gender,
+      password: form.password ? hashedPassword : user?.password, // Only include password if it's set
     }
 
     const updatePatientBody = {
@@ -128,7 +135,14 @@ export function UserDialog({ userId, trigger }: UserDialogProps) {
             disabled={!editMode}
             className="rounded border shadow-none"
           />
-
+          <label className="text-sm font-mono text-slate-500">New Password</label>
+          <Input
+            placeholder="Password"
+            value={form.password? form.password : ""}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            disabled={!editMode}
+            className="rounded border shadow-none"
+          />
           {/* Phone */}
           <label className="text-sm font-mono text-slate-500">Phone</label>
           <Input

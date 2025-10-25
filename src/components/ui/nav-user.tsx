@@ -66,9 +66,7 @@ export function NavUser({
     router.push("/");
   };
   const Logout = () => {
-    // Implement logout functionality here
-    // remove tokens, clear user data, redirect to login, etc.
-    console.log("Logging out...");
+    router.push("/");
   }
   const { isMobile } = useSidebar() // Detects sidebar mode (mobile or desktop)
   const [openDialog, setOpenDialog] = React.useState(false) // State for Account dialog

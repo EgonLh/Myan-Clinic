@@ -66,12 +66,12 @@ export default function PatientHistoryPage() {
   };
 
   const downloadCSV = () => {
-    const headers = ["Patient", "Doctor", "Date", "Notes", "Status"];
+    const headers = ["Patient", "Doctor", "Date", "Description", "Status"];
     const rows = filteredData.map((d) => [
       d.patient?.user?.name,
       d.doctor?.user?.name,
       d.date,
-      d.notes ?? "N/A",
+      d.description ?? "N/A",
       d.status,
     ]);
     const csvContent = [headers, ...rows].map((r) => r.join(",")).join("\n");
@@ -172,7 +172,7 @@ export default function PatientHistoryPage() {
                 <TableHead>Patient</TableHead>
                 <TableHead>Doctor</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead>Notes</TableHead>
+                <TableHead>Desp</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -184,7 +184,7 @@ export default function PatientHistoryPage() {
                     <TableCell>{record.patient?.user?.name}</TableCell>
                     <TableCell>{record.doctor?.user?.name}</TableCell>
                     <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{record.notes ?? "N/A"}</TableCell>
+                    <TableCell>{record.description ?? "N/A"}</TableCell>
                     <TableCell>
                       <Badge variant={record.status === "Completed" ? "default" : "outline"}>
                         {record.status}
@@ -222,7 +222,7 @@ export default function PatientHistoryPage() {
                             ].map(([label, value]) => (
                               <div key={label} className="flex justify-between border-b border-dotted py-1">
                                 <span className="text-gray-600">{label}:</span>
-                                <span>{value}</span>
+                                <span className="text-justify">{value}</span>
                               </div>
                             ))}
                           </div>

@@ -137,7 +137,7 @@ export default function AppointmentPage() {
               <div className="font-semibold">Status:</div>
               <div>{row.original.status}</div>
               <div className="font-semibold">Notes:</div>
-              <div>{row.original.notes || "-"}</div>
+              <div className="text-justify break-all text-xs border p-2 rounded">{row.original.notes || "-"}</div>
             </div>
             <div className="mt-4 flex justify-end">
               <DialogClose asChild>
@@ -153,11 +153,7 @@ export default function AppointmentPage() {
     { accessorKey: "doctorType", header: "Doctor Type" },
     { accessorKey: "date", header: "Date" },
     { accessorKey: "status", header: "Status" },
-    {
-      accessorKey: "notes",
-      header: "Notes",
-      cell: ({ row }) => <span className="font-mono text-xs">{row.original.notes || "-"}</span>,
-    },
+   
   ]
 
   // -------------------- Initialize Table --------------------
@@ -178,7 +174,7 @@ export default function AppointmentPage() {
   if (isLoading) return <LoadingPills message="Loading Appointments..." />
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 m-1">
       {/* -------------------- Filters -------------------- */}
       <div className="flex flex-col w-full border-dashed border p-4 rounded gap-5 shadow-none bg-white font-mono">
         {/* First row of filters */}

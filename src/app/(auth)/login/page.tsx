@@ -38,7 +38,12 @@ export default function LoginPage() {
       .required("Required"),
     acceptTerms: Yup.boolean().oneOf([true], "You must accept the terms"),
   })
-
+  const ForgotPasswordHandler = () => {
+    toast.info("Please contact support to reset your password.", {
+      description:
+        "For security reasons, password resets are handled through our support team.",
+    })
+  }
   const handleSubmit = async (
     values: typeof initialValues,
     { resetForm }: { resetForm: () => void }
@@ -64,7 +69,7 @@ export default function LoginPage() {
           break
       }
     } catch (err: any) {
-      console.error(err)
+      resetForm()
       toast.error("Login failed", {
         description:
           err?.data?.message || "Invalid email or password.",
@@ -206,12 +211,14 @@ export default function LoginPage() {
                         </div>
 
                         <div className="flex items-center justify-between text-sm">
-                          <Link
-                            href="/forgot-password"
+                          <Button
+                            type="button"
+                            variant="link"
+                            onClick={ForgotPasswordHandler}
                             className="text-purple-600 hover:text-purple-700"
                           >
                             Forgot password?
-                          </Link>
+                          </Button>
                         </div>
 
                         {/* ✅ Terms & Conditions Checkbox */}

@@ -105,7 +105,7 @@ export function MedicalRecords({ patientId }: MedicalRecordsProps) {
                     {appointment.doctor?.user?.name ?? "Unknown"}
                   </td>
                   <td className="p-2 border-b">{appointment.doctor?.type ?? "General"}</td>
-                  <td className="p-2 border-b">{appointment.notes ?? "No notes available"}</td>
+                  <td className="p-2 border-b max-w-40 truncate">{appointment.notes ?? "No notes available"}</td>
                   <td className="p-2 border-b truncate max-w-[200px]">
                     {appointment.description ?? "No description"}
                   </td>
@@ -162,7 +162,7 @@ export function MedicalRecords({ patientId }: MedicalRecordsProps) {
                             <p>
                               <strong>Status:</strong> {selectedAppointment.status}
                             </p>
-                            <p>
+                            <p className="text-justify">
                               <strong>Notes:</strong>{" "}
                               {selectedAppointment.notes ?? "No notes available"}
                             </p>

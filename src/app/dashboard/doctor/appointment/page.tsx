@@ -348,8 +348,8 @@ export default function AppointmentsPage() {
                     <span>{formatDate(selectedAppointment.createdAt)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-semibold">Notes:</span>
-                    <span>{selectedAppointment.notes || "No additional notes."}</span>
+                    <span className="font-semibold me-1">Notes:</span>
+                    <span className="text-justify">{selectedAppointment.notes || "No additional notes."}</span>
                   </div>
                 </>
               )}

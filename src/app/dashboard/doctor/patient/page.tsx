@@ -238,8 +238,8 @@ export default function PatientsPage() {
         </Card>
 
         {/* Patient Detail Modal */}
-        <Dialog open={!!selectedPatientId} onOpenChange={() => setSelectedPatientId(null)}>
-          <DialogContent>
+        <Dialog open={!!selectedPatientId} onOpenChange={() => setSelectedPatientId(null)} >
+          <DialogContent className="w-full max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Patient Details</DialogTitle>
               <DialogDescription>View and update patient information</DialogDescription>

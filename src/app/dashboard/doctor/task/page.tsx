@@ -162,7 +162,7 @@ export default function TasksPage() {
                     {new Date(appt.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </p>
 
-                  <p className="text-xs text-muted-foreground font-mono">{appt.notes}</p>
+                  <p className="text-xs text-muted-foreground font-mono text-justify my-1">{appt.notes}</p>
 
                 </div>
               ))}
@@ -284,7 +284,7 @@ export default function TasksPage() {
                     <p className="font-semibold text-gray-900">{selectedEvent?.description || "-"}</p>
 
                     <p className="text-gray-600">Notes:</p>
-                    <p className="font-semibold text-gray-900">{selectedEvent?.notes || "-"}</p>
+                    <p className="font-semibold text-gray-900 text-justify">{selectedEvent?.notes || "-"}</p>
 
                     {selectedEvent?.meetingLink && (
                       <>

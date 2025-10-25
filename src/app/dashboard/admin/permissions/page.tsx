@@ -42,8 +42,8 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
-import { BookDashed } from "lucide-react";
-
+import bcrypt from "bcryptjs";
+import LoadingPills from "@/components/ui/loading";
 export default function UserPermissionsPage() {
   // -------------------- API Queries & Mutations --------------------
   const { data: users = [], isLoading, isError } = useGetUsersQuery();
@@ -57,7 +57,7 @@ export default function UserPermissionsPage() {
   const [selectedUser, setSelectedUser] = React.useState<any | null>(null); // Currently edited user
 
   // -------------------- Loading / Error States --------------------
-  if (isLoading) return <div>Loading users...</div>;
+  if (isLoading) return <LoadingPills message="Loading users..." />;
   if (isError) return <div className="text-red-500">Failed to load users</div>;
 
   // -------------------- Filter Users --------------------
@@ -77,6 +77,19 @@ export default function UserPermissionsPage() {
     try {
       await updateUser({ id: selectedUser.id, body: selectedUser }).unwrap();
       setSelectedUser(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!selectedUser) return;
+    try {
+      // Assuming there's an API endpoint for resetting password
+      const plainPassword = "newpassword123";
+      const hashedPassword = await bcrypt.hash(plainPassword, 10);
+      await updateUser({ id: selectedUser.id, body: { password: hashedPassword } }).unwrap();
+      alert("Password reset successfully.");
     } catch (err) {
       console.error(err);
     }
@@ -323,6 +336,12 @@ export default function UserPermissionsPage() {
                           className="flex-1 rounded-sm"
                         >
                           Update
+                        </Button>
+                        <Button
+                          onClick={handleResetPassword}
+                          className="flex-1 rounded-sm"
+                        >
+                          Reset Password
                         </Button>
                         <SheetClose asChild>
                           <Button variant="outline" className="flex-1 rounded-sm">
