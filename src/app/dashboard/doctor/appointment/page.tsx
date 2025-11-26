@@ -88,7 +88,17 @@ export default function AppointmentsPage() {
     setSelectedAppointment(null);
   };
 
+  const handleCancel = (app_id: number, reason?: string) => {
+    if (!appointments) return;
 
+    const cancelObj = {
+      status: "Cancelled" as const,
+      notes: reason || "Appointment cancelled By The Doctor",
+    };
+
+    updateAppointment({ id: app_id, body: cancelObj });
+    setSelectedAppointment(null);
+  };
   // Loading doctor data
   if (!doctorId || !doctorData) {
     return (
@@ -106,7 +116,7 @@ export default function AppointmentsPage() {
   } = generalistView
       ? useGetAppointmentsQuery()
       : useGetAppointmentsByDoctorQuery(doctorId, { skip: !doctorId });
- 
+
 
   // Loading state
   if (isLoading)
@@ -167,10 +177,8 @@ export default function AppointmentsPage() {
               Appointments
             </h1>
             <p className="text-muted-foreground text-balance tracking-wide py-2 font-mono text-xs">
-              Manage your patient appointments as {generalistView ? "Generalist" : "Specialist."}<br />
-              {generalistView
-                ? "View all assigned patients and assign after diagnosis."
-                : "Take diagnosis in this view."}
+              Manage patient appointments <br/> {generalistView ? "- As Generalist" : ""}<br />
+              
             </p>
           </div>
 
@@ -358,6 +366,7 @@ export default function AppointmentsPage() {
             <DialogFooter>
               <Button onClick={() => setSelectedAppointment(null)}>Close</Button>
               {(selectedAppointment?.status)?.toLowerCase() == "pending" && selectedAppointment?.doctorId == doctorId ? <Button onClick={() => handleConfirmed(selectedAppointment.id)}>Confirm</Button> : ""}
+              <Button variant="destructive" onClick={() => handleCancel(selectedAppointment.id, "Cancelled by the doctor")}>Cancel</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

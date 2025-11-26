@@ -13,7 +13,8 @@ import * as Yup from "yup"
 import { useDispatch } from "react-redux"
 import { setCredentials } from "@/app/store/features/auth/authSlice"
 import { useRegisterMutation } from "@/app/store/features/auth/authApi"
-import { redirect } from "next/navigation"
+import { redirect, useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 
 interface RegisterFormValues {
@@ -26,6 +27,7 @@ interface RegisterFormValues {
 
 export default function RegisterPage() {
   const dispatch = useDispatch();
+  const router = useRouter();
   const [register, { isLoading, error }] = useRegisterMutation();
   const initialValues: RegisterFormValues = {
     name: "",
@@ -47,12 +49,12 @@ export default function RegisterPage() {
     console.log("Registration attempt:", values)
     try{
       const result = await register(values).unwrap();
-      dispatch(setCredentials({ user: result.user, token: result?.accessToken }));
       console.log("Registration successful:", result);
-      
-      redirect('/login');
+      toast.success("Registration successful! Please log in.");
+      router.push('/login');
     } catch (error) {
-      console.error("Registration failed:", error);
+      toast.error("Registration failed. Please try again. Duplicate usernames or emails are not allowed.");
+      router.push('/register');
     }
   }
 

@@ -27,34 +27,35 @@ export default function PatientDetailDialog({
   const [updateAppointment] = useUpdateAppointmentMutation();
   // ----- Save Hander ----- //
   const handleSave = async () => {
-     const mergedAppointments = appointments.map((appt: any) => {
+    const mergedAppointments = appointments.map((appt: any) => {
       const edited = editedNotes.find((n) => n.id === appt.id);
       return {
         id: appt.id,
-        notes: `Appointment Log: ${appt.notes || "---"} , Doctor Notes: ${edited?.notes || ""}`,
+        notes: "Doctor Notes :" + (edited?.notes?.trim() || "") + "\n" + "Patient Condition :" + condition,
       };
     });
-    if(mergedAppointments.length>0){
+
+    if (mergedAppointments.length > 0) {
       for (const appt of mergedAppointments) {
         try {
           await updateAppointment({ id: appt.id, body: { notes: appt.notes } }).unwrap();
         } catch (err) {
           console.error(`Failed to update appointment ${appt.id}:`, err);
           toast.error(`Failed to update appointment ${appt.id}.`);
-        } 
-    }
+        }
+      }
 
-    console.log("Merged Appointments:", mergedAppointments);
-    try {
-      await updatePatient({ id: patient.id, body: { condition } }).unwrap();
-      setIsEditMode(false);
-      toast.success("Condition updated successfully");
-    } catch (err) {
-      console.error("Failed to update condition:", err);
-      toast.error("Failed to update condition.");
-    }
+      console.log("Merged Appointments:", mergedAppointments);
+      try {
+        await updatePatient({ id: patient.id, body: { condition } }).unwrap();
+        setIsEditMode(false);
+        toast.success("Condition updated successfully");
+      } catch (err) {
+        console.error("Failed to update condition:", err);
+        toast.error("Failed to update condition.");
+      }
+    };
   };
-  };  
 
   // 🔹 Download file handler
   const handleDownload = async (fileId: number, filename: string) => {
@@ -82,7 +83,7 @@ export default function PatientDetailDialog({
     }
   };
   // ----- Handle appointment notes change -----
-   const handleNoteChange = (id: number, value: string) => {
+  const handleNoteChange = (id: number, value: string) => {
     setEditedNotes((prev: { id: number; }[]) =>
       prev.map((n: { id: number; }) => (n.id === id ? { ...n, notes: value } : n))
     );
@@ -160,7 +161,7 @@ export default function PatientDetailDialog({
         {appointments.length > 0 ? (
           appointments.map((appt: any) => (
             <div key={appt.id} className=" py-1 text-xs">
-              <span className="font-semibold mb-2">{formatDate(appt.date)}:</span><br/>
+              <span className="font-semibold mb-2">{formatDate(appt.date)}:</span><br />
               {isEditMode ? (
                 <textarea
                   className="border rounded w-full mt-1 p-1 text-xs"
@@ -228,7 +229,7 @@ export default function PatientDetailDialog({
                 <span
                   className=" truncate  text-[10px] max-w-[100px] cursor-pointer hover:underline">
                   {file.log || "No log"}
-                  </span>
+                </span>
                 <div className="flex items-center gap-2 ">
                   <span className="text-muted-foreground text-[10px] ">
                     {formatDate(file.createdAt)}

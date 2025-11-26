@@ -19,11 +19,12 @@ interface Message {
 
 // ----- Suggested questions ----- //
 const SUGGESTED_QUESTIONS = [
-  "How to book an appointment?",
-  "What are your working hours?",
-  "How to upload an invoice?",
-  "How do I join my appointment?",
-  "Can I reschedule my appointment?"
+  "How do I book an appointment online?",
+  "How can I contact customer support?",
+  "Are my medical records secure?",
+  "Do you provide online consultations?",
+  "Can I use Myan Clinic on mobile?",
+  "Is my data shared with third parties?"
 ];
 
 export default function ChatBotBox() {

@@ -33,9 +33,14 @@ export function JoinMeeting({ patientId }: JoinNowProps) {
     return <p className="font-mono text-sm">No upcoming appointments</p>
 
   // -----  get next upcoming appointment ----- //
-  const upcomingAppointments = appointments
-    .filter((appt) => new Date(appt.date) >= new Date() && appt.status.toLowerCase() !== "done")
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+const upcomingAppointments = appointments
+  .filter(
+    (appt) =>
+      new Date(appt.date) >= new Date() &&
+      !["done", "cancelled"].includes(appt.status.toLowerCase())
+  )
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
 
   const nextAppointment = upcomingAppointments[0]
   if (!nextAppointment) return <p className="font-mono text-sm">No upcoming appointments</p>
@@ -134,7 +139,7 @@ export function JoinMeeting({ patientId }: JoinNowProps) {
         </div>
         <div className="flex justify-between my-2 text-xs border-slate-200 pb-1">
           <span className="text-muted-foreground">Payment Status:</span>
-          {nextAppointment.status.toLowerCase() !== "not_started" ? (
+          {nextAppointment.status.toLowerCase() == "confirmed" ? (
             <span className="text-green-600">Completed</span>
           ) : (
             <span className="text-green-600">-</span>

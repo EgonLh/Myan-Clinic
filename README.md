@@ -1,10 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MyanClinic Frontend (Next.js)
+
+This is the frontend application for **MyanClinic**, built with **Next.js**, **TypeScript**, and **Redux Toolkit**. The project implements a modern, modular, and scalable UI for patient, doctor, and admin operations such as appointments, digital records, and user management.
+
+It was bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+---
+
+## Features
+
+* **Next.js App Router** with server/client components
+* **Authentication workflow** (JWT-based)
+* **Role-based UI rendering** (Patient, Doctor, Admin)
+* **Redux Toolkit** for global state management
+* **Protected Routes** with middleware
+* **React Query or Fetch wrappers** (depending on your setup)
+* **File uploads** (medical records, images)
+* **Appointment booking UI**
+* **Responsive UI with TailwindCSS**
+* **Reusable components** for tables, forms, modals, layouts
+* **Integration with Nest.js backend (MyanClinic API)**
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install dependencies
 
-```bash
+```
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
+
+### 2. Start development server
+
+```
 npm run dev
 # or
 yarn dev
@@ -14,23 +48,150 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+Create a `.env.local` file:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_AI_URL=http://localhost:8000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Add any additional tokens or encryption keys based on your authentication workflow.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Architecture
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+│── app/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── (guest)/login/
+│   ├── (protected)/dashboard/
+│   ├── middleware.ts
+│   └── api/ (optional route handlers)
+│
+├── components/
+│   ├── ui/              # buttons, inputs, modals
+│   ├── layout/          # navbar, sidebar
+│   ├── forms/           
+│   └── widgets/         # dashboard widgets
+│
+├── hooks/
+│   ├── useHandleLogout.ts
+│   ├── useAuth.ts
+│   └── useFetch.ts
+│
+├── store/
+│   ├── index.ts
+│   ├── hooks.ts
+│   └── features/
+│       ├── auth/
+│       ├── user/
+│       └── appointments/
+│
+├── services/            # Axios/Fetch API wrappers
+│   ├── auth.service.ts
+│   ├── user.service.ts
+│   └── appointment.service.ts
+│
+├── types/               # DTOs, shared interfaces
+│
+├── lib/                 # utilities (formatters, constants)
+│
+└── assets/              # images, icons
+```
+
+---
+
+## Authentication Workflow (Frontend)
+
+1. User logs in → receive JWT from backend.
+2. Token stored in:
+
+   * Redux state
+   * localStorage
+3. Middleware checks:
+
+   * If token missing → redirect to `/login`
+4. Protected routes under `(protected)/`
+5. Logout:
+
+   * Clear Redux state
+   * Clear token storage
+   * Redirect to login
+
+---
+
+## API Integration
+
+Backend endpoints follow Nest.js structure:
+
+```
+/auth/login
+/auth/register
+/patient/*
+/doctor/*
+/appointment/*
+/storage/upload
+```
+
+All API calls are wrapped inside:
+
+```
+src/services/*.ts
+```
+
+Example:
+
+```ts
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+});
+
+export const login = (data) => api.post("/auth/login", data);
+```
+
+---
+
+## Scripts
+
+```
+npm run dev       # start dev server
+npm run build     # production build
+npm run start     # start production server
+npm run lint      # lint project
+```
+
+---
+
+## Deployment
+
+The suggested deployment platforms:
+
+* **Vercel** (recommended for Next.js)
+* **Netlify**
+* **Docker** (if deployed with backend)
+
+Quick deploy on Vercel:
+
+```
+vercel
+```
+
+Ensure environment variables are configured on the Vercel dashboard.
+
+---
+

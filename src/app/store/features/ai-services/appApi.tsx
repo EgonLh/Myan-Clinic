@@ -18,7 +18,7 @@ export interface UploadMedicineResponse {
 export const appApi = createApi({
   reducerPath: "appApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://127.0.0.1:8000",
+    baseUrl: process.env.NEXT_PUBLIC_AI_URL || "http://localhost:8000",
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as any).auth?.token;
       if (token) headers.set("Authorization", `Bearer ${token}`);

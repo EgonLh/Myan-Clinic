@@ -71,8 +71,8 @@ export default function TasksPage() {
     costs: appt.costs,
   }));
 
-  if (isLoading) return <div className="flex items-center justify-center h-screen"><LoadingPills message="Data is Loading .."/></div>;
-  if (isError) return <div className="flex items-center justify-center h-screen text-red-500"><LoadingPills message="Data is Fetching .."/></div>;
+  if (isLoading) return <div className="flex items-center justify-center h-screen"><LoadingPills message="Data is Loading .." /></div>;
+  if (isError) return <div className="flex items-center justify-center h-screen text-red-500"><LoadingPills message="Data is Fetching .." /></div>;
 
   return (
     <>
@@ -142,31 +142,54 @@ export default function TasksPage() {
           <div className="flex flex-col md:flex-row gap-6">
 
             {/* Appointment List */}
-            <div className="w-full md:w-1/4   border rounded-md p-2">
-              <h2 className="text-sm font-semibold mb-2 underline w-full text-center font-mono mt-2">Appointments List</h2>
-              {filteredAppointments.map((appt) => (
-                <div
-                  key={appt.id}
-                  className="p-2 hover:border hover:my-2 cursor-pointer transition-all duration-300 border-b hover:rounded"
-                  onClick={() => {
-                    setSelectedDate(new Date(appt.date));
-                    setSelectedEvent(calendarEvents.find((e) => e.id === appt.id) || null);
-                  }}
-                >
-                  <div className="flex justify-between">
-                    <p className="text-sm font-medium">{appt.patient.user.name}</p>
-                    <p className="text-xs text-muted-foreground">{appt.status}</p>
+            <div className="w-full md:w-1/4 border rounded-md p-2">
+              <h2 className="text-sm font-semibold mb-2 underline w-full text-center font-mono mt-2">
+                Appointments List
+              </h2>
+
+              {/* Date filter input */}
+              <div className="mb-3">
+                <input
+                  type="date"
+                  className="w-full border rounded-md p-1"
+                  value={selectedDate ? selectedDate.toISOString().split("T")[0] : ""}
+                  onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                />
+              </div>
+
+              {filteredAppointments
+                .filter((appt) => {
+                  // If a date is selected, filter appointments for that day
+                  if (!selectedDate) return true;
+                  const apptDate = new Date(appt.date);
+                  return (
+                    apptDate.getFullYear() === selectedDate.getFullYear() &&
+                    apptDate.getMonth() === selectedDate.getMonth() &&
+                    apptDate.getDate() === selectedDate.getDate()
+                  );
+                })
+                .map((appt) => (
+                  <div
+                    key={appt.id}
+                    className="p-2 hover:border hover:my-2 cursor-pointer transition-all duration-300 border-b hover:rounded"
+                    onClick={() => {
+                      setSelectedDate(new Date(appt.date));
+                      setSelectedEvent(calendarEvents.find((e) => e.id === appt.id) || null);
+                    }}
+                  >
+                    <div className="flex justify-between">
+                      <p className="text-sm font-medium">{appt.patient.user.name}</p>
+                      <p className="text-xs text-muted-foreground">{appt.status}</p>
+                    </div>
+                    <p className="text-xs my-1 text-muted-foreground font-mono rounded hover:border transition-all duration-300 w-fit hover:p-1">
+                      {new Date(appt.date).toLocaleDateString()} -{" "}
+                      {new Date(appt.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                    <p className="text-xs text-muted-foreground font-mono text-justify my-1">{appt.notes}</p>
                   </div>
-                  <p className="text-xs my-1 text-muted-foreground font-mono rounded hover:border transition-all duration-300 w-fit hover:p-1">
-                    {new Date(appt.date).toLocaleDateString()} -{" "}
-                    {new Date(appt.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-
-                  <p className="text-xs text-muted-foreground font-mono text-justify my-1">{appt.notes}</p>
-
-                </div>
-              ))}
+                ))}
             </div>
+
 
             {/* Calendar + Appointment Detail */}
             <div className="flex-1 flex flex-col gap-4 border-0 ">

@@ -95,7 +95,7 @@ export function MedicineIdentifier() {
       // ✅ Set result from response
       setResult(response)
     } catch (err) {
-      console.error("Upload failed:", err)
+      console.log("Upload failed:", err)
       setResult(null)
     } finally {
       setIsAnalyzing(false)
@@ -154,9 +154,9 @@ export function MedicineIdentifier() {
               </div>
             ) : (
               <div className="relative">
-                {previewImage ? (
+                {previewImage && previewImage.trim() !== "" && (
                   <img src={previewImage} alt="Selected medicine" className="w-full h-64 object-cover rounded-lg" />
-                ) : null}
+                )}
                 <Button variant="destructive" size="icon" className="absolute top-2 right-2" onClick={clearImage}>
                   <X className="w-4 h-4" />
                 </Button>

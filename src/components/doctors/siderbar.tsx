@@ -9,7 +9,6 @@ import { Calendar, Users, Building2, UserCheck, Settings, Menu, X, BriefcaseMedi
 import { RootState } from "@/app/store/store"
 import { useDispatch, useSelector } from "react-redux"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { clearDoctor } from "@/app/store/features/doctor/doctorSlice"
 // --- navigation for both specialist and generalist doctor -- //
 const Generalistnavigation = [
   { name: "Tasks", href: "/dashboard/doctor/task", icon: UserCheck },
@@ -39,8 +38,8 @@ export function Sidebar() {
   const navigation = doctor?.data?.type !== "Generalist" ? SpecialistNavigation : Generalistnavigation;
 
   const handleLogout = () => {
-    dispatch(clearDoctor());
-    redirect('/')
+    // dispatch(clearDoctor());
+    router.replace('/login')
   }
 
   const goToInfo = () => {

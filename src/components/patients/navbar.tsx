@@ -57,8 +57,11 @@ const navigationItems = [
 export function Navbar({ activeTab, onTabChange }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const {user} = useSelector((state:RootState) => state.auth);
-  const handleLogout = useHandleLogout()
-
+  const router = useRouter();
+  // const handleLogout = useHandleLogout()
+  const Logout = () => {
+    router.replace("/login")
+  }
   if (!user) {
     return <LoadingPills message="Loading user data..." />
   }
@@ -128,7 +131,7 @@ export function Navbar({ activeTab, onTabChange }: NavbarProps) {
                 Help & Support
               </DropdownMenuItem>
               <DropdownMenuSeparator className="border-dotted border-t" />
-              <DropdownMenuItem className="font-mono" onClick={() => handleLogout()}>
+              <DropdownMenuItem className="font-mono" onClick={Logout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Log out
               </DropdownMenuItem>

@@ -31,7 +31,7 @@ export interface AppointmentsPerDoctor {
 export const analysisApi = createApi({
   reducerPath: "analysisApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:3000", // your backend URL
+    baseUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000", 
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as any).auth.token; // if you store JWT
       if (token) {
