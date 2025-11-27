@@ -5,6 +5,30 @@ This is the frontend application for **MyanClinic**, built with **Next.js**, **T
 It was bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ---
+## System Test Credentials
+#### 1. Admin Account
+**Email:** admin@gmail.com<br/>
+**Password:** admin123
+
+---
+
+#### 2. Doctor Accounts
+
+##### 2.1 General Practitioner (GP)
+**Email:** generalist@myanclinic.com <br/>
+**Password:** doc123
+
+##### 2.2 Specialist Doctor
+**Email:** doctor01@gamil.com <br/> 
+**Password:** doc123
+
+---
+
+#### 3. Patient Account
+**Email:** patient01@gmail.com <br/>
+**Password:** user123
+
+---
 
 ## Features
 

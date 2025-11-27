@@ -13,6 +13,7 @@ import { IFile } from "@/types/file.type"
 import { useGetFilesByStorageQuery, useDownloadFileQuery } from "@/app/store/features/files/FileApi"
 import { Patient } from "@/types/patient.type"
 import { useGetPatientsQuery } from "@/app/store/features/patient/patientApi"
+import { useGetStorageByPatientQuery } from "@/app/store/features/storage/storageApi"
 
 export default function DocumentStoragePage() {
   const [search, setSearch] = React.useState("")
@@ -37,7 +38,7 @@ export default function DocumentStoragePage() {
   )
 
   //  Files for selected patient
-  const { data: files = [], isLoading: isFilesLoading } = useGetFilesByStorageQuery(selectedPatient?.id ?? 0, {
+  const { data: files, isLoading: isFilesLoading } = useGetStorageByPatientQuery(selectedPatient?.id ?? 0, {
     skip: !selectedPatient,
   })
 
@@ -58,7 +59,7 @@ export default function DocumentStoragePage() {
     }
   }, [downloadedBlob])
 
-
+  console.log("Selected Patient:", selectedPatient)
   //  Generate PDF of all file names
   const downloadPDF = () => {
     if (!selectedPatient || !files.length) return
@@ -70,15 +71,17 @@ export default function DocumentStoragePage() {
     doc.setFontSize(12)
     doc.text(`Email: ${selectedPatient.email}`, 10, 35)
     doc.text(`Phone: ${selectedPatient.phone}`, 10, 45)
-    doc.text(`DOB: ${selectedPatient.dob}`, 10, 55)
+    doc.text(`DOB: ${selectedPatient.createdAt}`, 10, 55)
 
     doc.setFontSize(14)
     doc.text("Documents:", 10, 75)
-    files.forEach((file: IFile, index: number) => {
-      doc.text(`${index + 1}. ${file.filename}`, 12, 90 + index * 10)
+    const filesList = files[0]?.files || [];
+    filesList.forEach((file: IFile, index: number) => {
+      doc.text(`${index + 1}. ${file.log}`, 12, 90 + index * 10)
     })
     doc.save(`${selectedPatient.name.replace(/\s+/g, "_")}_documents.pdf`)
   }
+
 
   return (
     <div className="p-4 lg:p-6 space-y-4 font-mono">
@@ -143,7 +146,7 @@ export default function DocumentStoragePage() {
                             <div className="mt-4 text-sm text-gray-500">Loading files...</div>
                           ) : files && files.length > 0 ? (
                             <div className="mt-4 space-y-2">
-                              {files.map((file: IFile) => (
+                              {(files[0]?.files).map((file: IFile) => (
                                 <div
                                   key={file.id}
                                   className="flex justify-between items-center border-b border-dotted py-1"
@@ -164,7 +167,7 @@ export default function DocumentStoragePage() {
                                 onClick={downloadPDF}
                                 className="w-full mt-4 rounded-sm"
                               >
-                                Download All as PDF
+                                Download Summary as PDF
                               </Button>
                             </div>
                           ) : (
